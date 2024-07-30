@@ -1,0 +1,46 @@
+.heading-section{
+    margin-top: 40px;
+    padding-left: 30px;
+}
+.heading{
+    font-size: 30px;
+}
+.explore-thumbnails{
+    align-items: center;
+    padding: 20px;
+
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
+}
+.info{
+    padding: 10px;
+    position: relative;
+}
+.thumbnail-section{
+    height: max-content;
+    position: relative;
+}
+.thumbnail{
+}
+.thumbnail-image{
+    height: 100%;
+    width: 100%;
+    object-fit: contain;
+    border-radius: 10%;
+}
+.thumbnail-section .overlay{
+    --overlay-width: 40px;
+    --overlay-height: 40px;
+    height: var(--overlay-height);
+    width: var(--overlay-width);
+    position: absolute;
+    left: calc(50% - var(--overlay-width)/2);
+    top: calc(50% - var(--overlay-height)/2);
+}
+.genre-name{
+    position: absolute;
+    left: 20px;
+    top: 20px;
+    font-size: 18px;
+    color: white;
+}

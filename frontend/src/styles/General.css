@@ -1,0 +1,78 @@
+@import "./color/light.css";
+
+/* @import "color/dark.css"; */
+body {
+    font-family: Roboto, Arial;
+    margin: 0;
+    transition: padding 0.2s;
+    background-color: var(--md-sys-color-background);
+    color: var(--md-sys-color-on-background);
+    cursor: context-menu;
+}
+
+.body {
+    padding-left: 240px;
+    padding-bottom: 80px;
+}
+
+.logo-section {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 2;
+    display: flex;
+}
+
+.logo {
+    padding: 12px;
+    border-radius: 20px;
+    overflow: hidden;
+}
+
+.logo-image {
+    height: 56px;
+    width: 56px;
+    border-radius: 28px;
+}
+.RoomContext{
+    position: fixed;
+    background-color: red;
+    left: 0;
+    top: 0;
+    z-index: 10;
+}
+
+@media (min-width: 600px) and (max-width: 1200px) {
+    .body {
+        padding-left: 80px;
+    }
+}
+
+@media (min-width: 1200px) {
+    .body {
+        padding-left: 240px;
+    }
+}
+
+@media (max-width: 600px) {
+    .body {
+        padding-left: 0px;
+    }
+
+    .logo-section {
+        position: absolute;
+    }
+
+    .logo-image {
+        height: 40px;
+        width: 40px;
+    }
+
+    .header {
+        padding-left: 60px;
+    }
+}
+
+div::-webkit-scrollbar {
+    display: none;
+}

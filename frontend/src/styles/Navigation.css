@@ -1,0 +1,161 @@
+.navigation{
+    background-color: var(--md-sys-color-surface-container);
+    color: var(--md-sys-color-on-surface-container);
+    display: flex;
+    position: fixed;
+    transition: width 0.15s;
+    z-index: 1;
+}
+.navigation a{
+    width: 100%;
+    text-decoration: none;
+    color: inherit;
+}
+.nav-button{
+    display: flex;
+    padding: 6px 0 6px 0;
+}
+.navigation .icon{
+    margin-top: 0;
+}
+.navigation .icon-label{
+    font-size: 16px;
+}
+.playlists{
+    display: none;
+}
+
+/* Navigation Rail */
+@media (min-width: 600px) and (max-width: 1200px){
+    .navigation{
+        flex-direction: column;
+        width: 56px;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        align-items: center;
+        justify-content: start;
+        padding: 76px 12px 12px 12px;
+    }
+    .nav-button{
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        width: inherit;
+        height: 56px;
+        padding: 6px 0 6px 0;
+        border-radius: 15px;
+    }
+    .navigation .icon{
+        border-radius: 16px;
+        width: 56px;
+        height: 32px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    .navigation .icon:hover, .navigation .icon:active{
+        background-color: var(--md-sys-color-secondary-container);
+        color: var(--md-sys-color-on-surface-variant);
+        font-weight: bold;
+    }
+    .navigation .icon-label{
+        font-size: 14px;
+    }
+}
+
+/* Navigation Drawer */
+@media (min-width: 1200px){
+    .navigation{
+        flex-direction: column;
+        top: 0px;
+        left: 0;
+        bottom: 0;
+        width: 216px;
+        align-items: start;
+        justify-content: start;
+        padding: 76px 12px 12px 12px;
+    }
+    .nav-button{
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+        width: inherit;
+        height: 56px;
+        border-radius: 28px;
+    }
+    .nav-button:hover{
+        background-color: var(--md-sys-color-secondary-container);
+        color: var(--md-sys-color-on-surface-variant);
+        font-weight: bold;
+    }
+    .navigation .icon{
+        padding-left: 16px;
+    }
+    .navigation .icon-label{
+        flex: 1;
+        margin-left: 20px;
+    }
+    .playlists{
+        position: static;
+        opacity: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 76px 0;
+        width: 100%;
+    }
+    .playlists .nav-button{
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: start;
+        /* padding-left: 40px; */
+    }
+    .playlist-label{
+        padding-left: 16px;
+    }
+    .playlist-des{
+        padding-left: 16px;
+    }
+}
+
+/* Navigation Bar */
+@media (max-width: 600px){
+    .navigation{
+        flex-direction: row;
+        height: 56px;
+        left: 0;
+        bottom: 0;
+        right: 0;
+        align-items: center;
+        justify-content: space-around;
+        padding: 12px 12px 12px 12px;
+    }
+    .nav-button{
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        width: inherit;
+        height: 56px;
+        padding: 6px 0 6px 0;
+        border-radius: 15px;
+    }
+    .navigation .icon{
+        border-radius: 16px;
+        width: 56px;
+        height: 32px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    .navigation .icon:hover, .navigation .icon:active{
+        background-color: var(--md-sys-color-secondary-container);
+        color: var(--md-sys-color-on-surface-variant);
+        font-weight: bold;
+    }
+    .navigation .icon-label{
+        font-size: 14px;
+    }
+}
