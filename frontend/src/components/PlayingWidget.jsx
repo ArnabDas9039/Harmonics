@@ -4,7 +4,6 @@ import "../styles/General.css";
 import PlayingContext from "../contexts/PlayingContext";
 import SeekBar from "./SeekBar";
 import api from "../api";
-import RoomContext from "../contexts/RoomContext";
 import { Link } from "react-router-dom";
 
 function PlayingWidget() {
@@ -13,8 +12,6 @@ function PlayingWidget() {
   const [duration, setDuration] = useState(0);
   const { playing, setPlaying, isPlaying, setIsPlaying, queue, setQueue } =
     useContext(PlayingContext);
-  const { roomId, currentSong, syncTime, setSyncTime, isHost } =
-    useContext(RoomContext);
   const [showPlayingPage, setShowPlayingPage] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [repeat, setRepeat] = useState(false);
@@ -31,10 +28,6 @@ function PlayingWidget() {
     audioRef.current.addEventListener("ended", handleSongEnd);
 
     handlePlayPause();
-
-    if (isHost) {
-      setSyncTime(currentTime);
-    }
 
     return () => {
       audioRef.current.removeEventListener("play", handlePlay);
@@ -59,73 +52,26 @@ function PlayingWidget() {
     }
   };
 
-  useEffect(() => {
-    fetchRadio();
-    if (isPlaying) {
-      const newTimer = setTimeout(() => {
-        // handleHistory();
-      }, 10000);
-      setTimer(newTimer);
-    } else {
-      if (timer) {
-        clearTimeout(timer);
-        setTimer(null);
-      }
-    }
+  // useEffect(() => {
+  //   fetchRadio();
+  //   if (isPlaying) {
+  //     const newTimer = setTimeout(() => {
+  //       handleHistory();
+  //     }, 10000);
+  //     setTimer(newTimer);
+  //   } else {
+  //     if (timer) {
+  //       clearTimeout(timer);
+  //       setTimer(null);
+  //     }
+  //   }
 
-    if (isHost && roomId) {
-      const update = async () => {
-        try {
-          const res = await api.put(`api/room/${roomId}/update/`, {
-            song_id: playing.id,
-          });
-          console.log(res);
-        } catch (err) {
-          alert(err);
-        }
-      };
-
-      update();
-    }
-
-    return () => {
-      if (timer) {
-        clearTimeout(timer);
-      }
-    };
-  }, [playing]);
-
-  useEffect(() => {
-    if (!isHost && audioRef.current && roomId) {
-      console.log("Setting currentTime to syncTime:", syncTime);
-
-      const handleSyncTime = () => {
-        if (audioRef.current.readyState === 4) {
-          // Ensure the audio is ready to play
-          audioRef.current.currentTime = syncTime;
-          console.log(
-            "Audio currentTime set to:",
-            audioRef.current.currentTime
-          );
-        } else {
-          console.log("Audio not ready, waiting for canplay event");
-          audioRef.current.addEventListener(
-            "canplaythrough",
-            () => {
-              audioRef.current.currentTime = syncTime;
-              console.log(
-                "Audio currentTime set to (canplay):",
-                audioRef.current.currentTime
-              );
-            },
-            { once: true }
-          );
-        }
-      };
-
-      handleSyncTime();
-    }
-  }, [syncTime, isHost]);
+  //   return () => {
+  //     if (timer) {
+  //       clearTimeout(timer);
+  //     }
+  //   };
+  // }, [playing]);
 
   const handleSongEnd = () => {
     if (repeat === true) {
@@ -180,7 +126,6 @@ function PlayingWidget() {
   };
 
   const handlePlayPause = () => {
-    console.log(isPlaying);
     if (isPlaying) {
       audioRef.current.play();
     } else {
@@ -189,7 +134,6 @@ function PlayingWidget() {
   };
 
   const handlePlayButton = () => {
-    console.log("Button Clicked");
     setIsPlaying(!isPlaying);
   };
 
@@ -338,7 +282,7 @@ function PlayingWidget() {
                     viewBox="0 -960 960 960"
                     width="28px"
                     fill="var(--md-sys-color-on-background)"
-                    >
+                  >
                     <path d="M327.69-420 480-572.31 632.31-420H327.69Z" />
                   </svg>
                 </button>
@@ -353,7 +297,7 @@ function PlayingWidget() {
                     viewBox="0 -960 960 960"
                     width="28px"
                     fill="var(--md-sys-color-on-background)"
-                    >
+                  >
                     <path d="M569.23-200v-40h124L552.38-380.85l28.54-28.53L720-270.31v-118.15h40V-200H569.23Zm-340.92 0L200-228.31 691.69-720H569.23v-40H760v188.46h-40v-120.15L228.31-200Zm147.15-357L200-732.46 227.54-760 403-584.54 375.46-557Z" />
                   </svg>
                 </button>
@@ -362,14 +306,14 @@ function PlayingWidget() {
                 <button
                   className="controls-button"
                   onClick={handlePreviousSong}
-                  >
+                >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     height="28px"
                     viewBox="0 -960 960 960"
                     width="28px"
                     fill="var(--md-sys-color-on-background)"
-                    >
+                  >
                     <path d="M269.23-295.38v-369.24h40v369.24h-40Zm421.54 0L413.85-480l276.92-184.62v369.24Z" />
                   </svg>
                 </button>
@@ -378,14 +322,14 @@ function PlayingWidget() {
                 <button
                   className="controls-button play-pause"
                   onClick={handlePlayButton}
-                  >
+                >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     height="28px"
                     viewBox="0 -960 960 960"
                     width="28px"
                     fill="var(--md-sys-color-on-background)"
-                    >
+                  >
                     {isPlaying ? (
                       <path d="M560-240v-480h140v480H560Zm-300 0v-480h140v480H260Z" />
                     ) : (
@@ -402,7 +346,7 @@ function PlayingWidget() {
                     viewBox="0 -960 960 960"
                     width="28px"
                     fill="var(--md-sys-color-on-background)"
-                    >
+                  >
                     <path d="M650.77-295.38v-369.24h40v369.24h-40Zm-381.54 0v-369.24L546.15-480 269.23-295.38Z" />
                   </svg>
                 </button>

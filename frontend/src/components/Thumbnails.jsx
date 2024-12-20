@@ -104,7 +104,6 @@ export function MediumThumbnail({ item }) {
       setPlaying(item);
       setIsPlaying(true);
     }
-    console.log(item.file_url);
   };
 
   return (

@@ -30,8 +30,4 @@ urlpatterns = [
     path("radio/post/", views.CreateRadioView.as_view(), name="radio_post"),
     path("history/post/", views.CreateHistoryView.as_view(), name="history_post"),
     path("history/get/", views.HistoryView.as_view(), name="history_get"),
-    path("room/<room_id>", views.RoomView.as_view(), name="room_get"),
-    path("room/<room_id>/update/", views.UpdateRoomView.as_view(), name="room_update"),
-    path("room/create/", views.CreateRoomView.as_view(), name="room_create"),
-    # path("notes/delete/<int:pk>", views.NoteDelete.as_view(), name="delete-note"),
 ] + staticfiles_urlpatterns()

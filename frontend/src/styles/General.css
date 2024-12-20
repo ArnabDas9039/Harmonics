@@ -1,4 +1,4 @@
-@import "./color/dark.css";
+@import "./color/light.css";
 
 /* @import "color/dark.css"; */
 body {
@@ -34,7 +34,8 @@ body {
     width: 56px;
     border-radius: 28px;
 }
-.RoomContext{
+
+.RoomContext {
     position: fixed;
     background-color: red;
     left: 0;
