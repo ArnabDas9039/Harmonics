@@ -43,7 +43,7 @@ function PlayingWidget() {
   const fetchRadio = async () => {
     try {
       const response = await api.get("api/radio/");
-      console.log(response.data[0]);
+      // console.log(response.data[0]);
       setQueue(response.data[0].results);
     } catch (err) {
       alert(err);
@@ -52,26 +52,26 @@ function PlayingWidget() {
     }
   };
 
-  // useEffect(() => {
-  //   fetchRadio();
-  //   if (isPlaying) {
-  //     const newTimer = setTimeout(() => {
-  //       handleHistory();
-  //     }, 10000);
-  //     setTimer(newTimer);
-  //   } else {
-  //     if (timer) {
-  //       clearTimeout(timer);
-  //       setTimer(null);
-  //     }
-  //   }
+  useEffect(() => {
+    fetchRadio();
+    // if (isPlaying) {
+    //   const newTimer = setTimeout(() => {
+    //     handleHistory();
+    //   }, 10000);
+    //   setTimer(newTimer);
+    // } else {
+    //   if (timer) {
+    //     clearTimeout(timer);
+    //     setTimer(null);
+    //   }
+    // }
 
-  //   return () => {
-  //     if (timer) {
-  //       clearTimeout(timer);
-  //     }
-  //   };
-  // }, [playing]);
+    // return () => {
+    //   if (timer) {
+    //     clearTimeout(timer);
+    //   }
+    // };
+  }, [playing]);
 
   const handleSongEnd = () => {
     if (repeat === true) {
@@ -111,7 +111,7 @@ function PlayingWidget() {
   const handleLike = async () => {
     try {
       const response = api.put("api/library/post/", { song_id: playing.id });
-      console.log(response);
+      // console.log(response);
     } catch (err) {
       alert(err);
     }
@@ -171,18 +171,18 @@ function PlayingWidget() {
     );
   }
 
-  if (isLoading) {
-    return (
-      <div>
-        <audio
-          ref={audioRef}
-          src={playing && playing.file_url}
-          onTimeUpdate={handleTimeUpdate}
-        />
-        Loading...
-      </div>
-    );
-  }
+  // if (isLoading) {
+  //   return (
+  //     <div>
+  //       <audio
+  //         ref={audioRef}
+  //         src={playing && playing.file_url}
+  //         onTimeUpdate={handleTimeUpdate}
+  //       />
+  //       Loading...
+  //     </div>
+  //   );
+  // }
 
   return (
     <div>
@@ -207,7 +207,13 @@ function PlayingWidget() {
                   <b>{playing && playing.title}</b>
                   {/* {isPlaying ?  : "Nothing is playing"} */}
                 </div>
-                <div className="title-info"></div>
+                <div className="title-info">
+                  {playing.artist.map((person) => (
+                    <Link to={"/artist/" + person.id} key={person.id}>
+                      {person.name + " "}
+                    </Link>
+                  ))}
+                </div>
               </div>
             </div>
             <div className="seek-bar-section">
@@ -396,7 +402,7 @@ function PlayingWidget() {
                           setPlaying(song);
                           setIsPlaying(true);
                         }
-                        console.log(song.file_url);
+                        // console.log(song.file_url);
                       }}
                     >
                       <button className="controls-button play-pause">
@@ -516,7 +522,7 @@ function PlayingWidget() {
                   played={(currentTime / duration) * 100}
                 />
               </div>
-              <div>
+              <div className="playing-time">
                 {Math.floor(currentTime / 60)}:
                 {Math.floor(currentTime % 60)
                   .toString()
@@ -544,7 +550,13 @@ function PlayingWidget() {
                 {playing && playing.title}
                 {/* {isPlaying ?  : "Nothing is playing"} */}
               </div>
-              <div className="title-info"></div>
+              <div className="title-info">
+                {playing.artist.map((person) => (
+                  <Link to={"/artist/" + person.id} key={person.id}>
+                    {person.name + " "}
+                  </Link>
+                ))}
+              </div>
             </div>
           </div>
           <div className="widget-right-section">

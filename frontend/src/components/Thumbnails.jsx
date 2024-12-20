@@ -15,7 +15,7 @@ export function GridThumbnail({ item }) {
         seed: [playing.id],
         results: [playing.id],
       });
-      console.log(response.data);
+      // console.log(response.data);
       setRadioCreated(true);
     } catch (err) {
       alert(err);
@@ -32,7 +32,7 @@ export function GridThumbnail({ item }) {
       setPlaying(item);
       setIsPlaying(true);
     }
-    console.log(item.file_url);
+    // console.log(item.file_url);
     if (playing && !radioCreated) {
       createRadio(item);
     }
@@ -170,7 +170,7 @@ export function AlbumThumbnail({ item }) {
     //   setPlaying(item);
     //   setIsPlaying(true);
     // }
-    console.log(item.file_url);
+    // console.log(item.file_url);
   };
 
   return (
@@ -237,7 +237,7 @@ export function PlaylistThumbnail({ item }) {
     //   setPlaying(item);
     //   setIsPlaying(true);
     // }
-    console.log(item.file_url);
+    // console.log(item.file_url);
   };
 
   return (
