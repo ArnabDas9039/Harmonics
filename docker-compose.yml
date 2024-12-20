@@ -1,0 +1,30 @@
+version: "3.8"
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    command: >
+      sh -c "python manage.py migrate &&
+            uvicorn backend.asgi:application --host 0.0.0.0 --port 8000"
+    volumes:
+      - ./backend:/app
+      - db_data:/app
+    ports:
+      - "8000:8000"
+    environment:
+      - DJANGO_SETTINGS_MODULE=backend.settings
+      - DATABASE_URL=sqlite:///app/db.sqlite3
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    environment:
+      - VITE_API_URL=http://backend:8000/api
+    ports:
+      - "80:80"
+
+volumes:
+  db_data:

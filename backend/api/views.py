@@ -9,6 +9,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from .models import *
 from .mypaginations import MyLimitOffsetPagination
 from django.shortcuts import get_object_or_404
+from .radioengine import RadioCreate
 import random
 import logging
 
@@ -207,15 +208,59 @@ class CreateLibraryView(generics.CreateAPIView):
         # logger.error('Validation errors: %s', serializer.errors)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
+class UpdateLibraryView(generics.UpdateAPIView):
+    serializer_class = CreateLibrarySerializer
+    permission_classes = [IsAuthenticated]
+    
+    def put(self, request):
+        try:
+            library = self.get_object()
+        
+            song_id = request.data.get('song_id')
+            if not song_id:
+                return Response({'detail': 'song not provided'}, status = status.HTTP_400_BAD_REQUEST)
+            try:
+                song = Song.objects.get(id = song_id)
+            except Song.DoesNotExist:
+                return Response({'detail': 'song not found'}, status = status.HTTP_404_NOT_FOUND)
+            
+            library.liked_songs.add(song)
+            library.save()
+            
+            serializer = self.serializer_class(library)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        
+        except UserLibrary.DoesNotExist:
+            return Response({'detail': 'Library not found'}, status = staus.HTTP_404_NOT_FOUND)
+        
+    def get_object(self):
+        queryset = UserLibrary.objects.all()
+        obj = generics.get_object_or_404(queryset, user=self.request.user)
+        # logger.debug()
+        return obj
+    
 class RadioView(generics.ListAPIView):
     serializer_class = RadioSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
     pagination_class = MyLimitOffsetPagination
     
     def get_queryset(self):
         user = self.request.user
-        return Radio.objects.all()
+        return Radio.objects.filter(user = user)
     
+class CreateRadioView(generics.CreateAPIView):
+    serializer_class = CreateRadioSerializer
+    permission_classes = [IsAuthenticated]
+    
+    def post(self, request, *args, **kwargs):
+        # queuemodifier = RadioCreate(data=request.data)
+        serializer = CreateRadioSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(user=request.user)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        logger.error('Validation errors: %s', serializer.errors)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 class CreateRoomView(generics.CreateAPIView):
     serializer_class = CreateRoomSerializer
     permission_classes = [AllowAny]

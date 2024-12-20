@@ -91,7 +91,7 @@ class Radio(models.Model):
     user = models.ForeignKey(User, on_delete = models.CASCADE)
     seed = models.ManyToManyField(Song, blank = False, related_name = "seeds")
     results = models.ManyToManyField(Song, blank = False, related_name = "results")
-    
+
 class Room(models.Model):
     room_id = models.CharField(max_length = 20, primary_key = True)
     host = models.ForeignKey(User, on_delete = models.CASCADE)
@@ -99,4 +99,4 @@ class Room(models.Model):
     participants = models.ManyToManyField(User, blank = True, related_name = "participant")
     
     def __str__(self):
-        return f"{self.room_id}"    
+        return f"{self.room_id}"

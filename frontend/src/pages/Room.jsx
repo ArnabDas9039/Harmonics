@@ -43,7 +43,7 @@ export function Room() {
       await api
         .post("api/room/create/", {
           room_id: parseInt(Math.random() * 10000),
-          current_song: playing,
+          current_song: playing.id,
         })
         .then((res) => res.data)
         .then(async (data) => {

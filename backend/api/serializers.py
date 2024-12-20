@@ -5,7 +5,7 @@ from .models import *
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ["username", "profile_image_url"]
+        fields = ["username"]
         extra_kwargs = {"password": {"write_only": True}}
     
     def create(self, validated_data):
@@ -117,6 +117,12 @@ class RadioSerializer(serializers.ModelSerializer):
     class Meta:
         model = Radio
         fields = ['results']
+        
+class CreateRadioSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Radio
+        fields = '__all__'
+        read_only_fields = ['user']
         
 class RoomSerializer(serializers.ModelSerializer):
     current_song = SongShortSerializer(many = False)

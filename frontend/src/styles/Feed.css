@@ -37,63 +37,6 @@
 .heading{
     font-size: 30px;
 }
-/* .featured{
-    display: grid;
-    padding: 20px;
-    max-height: 500px;
-    grid-template-rows: 50% 50%;
-    
-    --visible-cols: 3;
-    
-    --col-gap: 0px;
-    
-    --col-hint: 0px;
-    
-    --scrollbar-padding: 20px;
-    
-    --col-size: calc((100% / var(--visible-cols)) - var(--col-gap) - var(--col-hint) / var(--visible-cols));
-    
-    display: grid;
-    grid-auto-flow: column;
-    grid-template-columns: var(--col-size);
-    grid-auto-columns: var(--col-size);
-    overflow-x: auto;
-    overflow-y: hidden;
-    grid-gap: var(--col-gap);
-    padding-bottom: var(--scrollbar-padding);
-}
-.info{
-    padding: 10px;
-    position: relative;
-}
-.item1{
-    grid-column: 1 / 3;
-    grid-row: 1 / 3;
-}
-.item2{
-    grid-column: 3;
-    grid-row: 1;
-}
-.item3{
-    grid-column: 3;
-    grid-row: 2;
-}
-.featured .thumbnail{
-    height: 100%;
-    width: 100%;
-    border-radius: 20px;
-    overflow: hidden;
-}
-.featured-image{
-    border-radius: 20px;
-    width: 100%;
-    height: auto;
-}
-.featured .overlay{
-    position: absolute;
-    bottom: 40px;
-    left: 40px;
-} */
 .grid-thumbnails{
     display: grid;
     /* align-items: center; */
@@ -128,7 +71,7 @@
     
     --scrollbar-padding: 20px;
     
-    --col-size: calc((100% / var(--visible-cols)) - var(--col-gap) - var(--col-hint) / var(--visible-cols));
+    --col-size: calc(100% / var(--visible-cols));
     
     display: grid;
     grid-auto-flow: column;
@@ -136,8 +79,10 @@
     grid-auto-columns: var(--col-size);
     overflow-x: auto;
     overflow-y: hidden;
-    /* grid-gap: var(--col-gap); */
     padding-bottom: var(--scrollbar-padding);
+}
+.info{
+    border-radius: 10px;
 }
 .medium-thumbnails .info, .artist-thumbnails .info{
     padding: 4%;
@@ -190,7 +135,10 @@
     top: 0;
     opacity: 0;
 }
-.thumbnail-section:hover .overlay{
+.info:hover{
+    background-color: var(--md-sys-color-surface-container-high);
+}
+.info:hover .overlay{
     opacity: 1;
 }
 .overlay .play-pause{

@@ -1,5 +1,6 @@
 import { useState, useEffect, useContext } from "react";
 import api from "../api";
+import "@material/web/all.js";
 import {
   GridThumbnail,
   ArtistThumbnail,
@@ -43,19 +44,20 @@ function Home() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [generalResponse, songsResponse, artistsResponse] = await Promise.all([
-          api.get("/api/general/"),
-          api.get("/api/songs/top/?limit=10"),
-          api.get("/api/artists/top/?limit=10&seed=" + Math.random())
-        ]);
-        
+        const [generalResponse, songsResponse, artistsResponse] =
+          await Promise.all([
+            api.get("/api/general/"),
+            api.get("/api/songs/top/?limit=10"),
+            api.get("/api/artists/top/?limit=10&seed=" + Math.random()),
+          ]);
+
         setGeneralFeed(generalResponse.data[0]);
         setTopSongs(songsResponse.data.results);
         setTopArtists(artistsResponse.data.results);
 
-        if(isAuthorized){
+        if (isAuthorized) {
           const UserResponse = await api.get("/api/user/recommendation/");
-          
+
           setUserFeed(UserResponse.data[0]);
         }
       } catch (err) {
@@ -77,9 +79,12 @@ function Home() {
       <Header destination="Home" />
       <div className="feed">
         <div className="filters">
-          {chips.map((chip, index) => (
-            <Filter_chip name={chip} key={index} />
-          ))}
+          {/* <md-chip-set> */}
+            {chips.map((chip, index) => (
+              // <md-filter-chip label={chip} key={index}></md-filter-chip>
+              <Filter_chip name={chip} key={index} />
+            ))}
+          {/* </md-chip-set> */}
         </div>
         {isAuthorized === true && (
           <>

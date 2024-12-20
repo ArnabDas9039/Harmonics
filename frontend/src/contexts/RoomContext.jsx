@@ -28,6 +28,7 @@ export const RoomProvider = ({ children }) => {
   useEffect(() => {
     if (roomId) {
       console.log(typeof roomId);
+      // const socket = new WebSocket(`ws://10.109.53.14:8000/ws/room/${roomId}/`);
       const socket = new WebSocket(`ws://127.0.0.1:8000/ws/room/${roomId}/`);
       socketRef.current = socket;
 
@@ -42,7 +43,7 @@ export const RoomProvider = ({ children }) => {
           setIsPlaying(data.isPlaying);
           setSyncTime(data.currentTime);
           console.log(playing);
-          if(playing.id != data.currentSong){
+          if (playing.id != data.currentSong) {
             setPlaying(data.currentSong);
           }
         }
@@ -63,7 +64,7 @@ export const RoomProvider = ({ children }) => {
   }, [roomId]);
 
   useEffect(() => {
-    if(roomId){
+    if (roomId) {
       console.log(currentSong);
       setPlaying(currentSong);
     }
@@ -73,15 +74,16 @@ export const RoomProvider = ({ children }) => {
     const messageData = JSON.stringify({
       isPlaying: isPlaying,
       currentTime: currenttime,
-      currentSong: playing.id
+      currentSong: playing.id,
     });
     if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
       console.log(messageData);
       socketRef.current.send(messageData);
     } else {
-      console.error(
+      console
+        .error
         // "WebSocket is not open or connecting. Cannot send message."
-      );
+        ();
     }
   };
 

@@ -4,18 +4,18 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --host",
     "build": "vite build",
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
   },
   "dependencies": {
-    "axios": "^1.7.2",
+    "@material/web": "^2.0.0",
+    "axios": "^1.7.3",
     "jwt-decode": "^4.0.0",
-    "react": "^18.2.0",
-    "react-audio-player": "^0.17.0",
-    "react-dom": "^18.2.0",
-    "react-router-dom": "^6.23.1"
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.26.0"
   },
   "devDependencies": {
     "@types/react": "^18.2.66",

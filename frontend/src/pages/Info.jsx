@@ -32,7 +32,7 @@ export function Song_Info() {
   };
 
   const handlePlayButton = () => {
-    if ((playing.id != item.id) & isPlaying) {
+    if (playing.id != item.id && isPlaying) {
       setPlaying(item);
       setIsPlaying(true);
     } else {
@@ -61,22 +61,26 @@ export function Song_Info() {
                   className="controls-button play-pause"
                   onClick={handlePlayButton}
                 >
-                  <img
-                    src={
-                      isPlaying & (playing.id === item.id)
-                        ? "http://127.0.0.1:8000/api/static/icons/Pause.svg"
-                        : "http://127.0.0.1:8000/api/static/icons/Play.svg"
-                    }
-                    alt=""
-                    className="controls-button-icon"
-                  />
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    height="28px"
+                    viewBox="0 -960 960 960"
+                    width="28px"
+                    fill="var(--md-sys-color-on-background)"
+                  >
+                    {isPlaying ? (
+                      <path d="M560-240v-480h140v480H560Zm-300 0v-480h140v480H260Z" />
+                    ) : (
+                      <path d="M360-272.31v-415.38L686.15-480 360-272.31Z" />
+                    )}
+                  </svg>
                 </button>
               </div>
             </div>
             <div className="button">
               <button className="controls-button">
                 <img
-                  src="http://127.0.0.1:8000/api/static/icons/Pause.svg"
+                  src="http://127.0.0.1:8000/api/static/icons/Playlist_add.svg"
                   alt=""
                   className="controls-button-icon"
                 />
@@ -85,7 +89,7 @@ export function Song_Info() {
             <div className="button">
               <button className="controls-button">
                 <img
-                  src="http://127.0.0.1:8000/api/static/icons/Pause.svg"
+                  src="http://127.0.0.1:8000/api/static/icons/Like.svg"
                   alt=""
                   className="controls-button-icon"
                 />
@@ -116,6 +120,26 @@ export function Song_Info() {
             ))}
           </div>
         </div>
+      </div>
+      <div className="heading-section">
+        <div className="heading">
+          <b>Similar to this</b>
+        </div>
+      </div>
+      <div className="grid-thumbnails">
+        {/* {userFeed.quick_picks.map((item) => ( */}
+        {/* <GridThumbnail item={item} key={item.id} /> */}
+        {/* ))} */}
+      </div>
+      <div className="heading-section">
+        <div className="heading">
+          <b>More from the Artists</b>
+        </div>
+      </div>
+      <div className="medium-thumbnails">
+        {/* {userFeed.quick_picks.map((item) => ( */}
+        {/* <GridThumbnail item={item} key={item.id} /> */}
+        {/* ))} */}
       </div>
     </div>
   );
@@ -166,6 +190,15 @@ export function Artist_Info() {
           </div>
         </div>
         <div className="artist-info-section">
+          <div className="artist-thumbnail-section">
+            <div className="thumbnail">
+              <img
+                src={item.profile_image_url}
+                alt=""
+                className="artist-image"
+              />
+            </div>
+          </div>
           <div className="artist-name">{item.name}</div>
           <div className="options">
             <div className="button">
@@ -174,21 +207,52 @@ export function Artist_Info() {
                   className="controls-button play-pause"
                   // onClick={handlePlayButton}
                 >
-                  {/* <img
-                    src={
-                      isPlaying
-                        ? "http://127.0.0.1:8000/api/static/icons/Pause.svg"
-                        : "http://127.0.0.1:8000/api/static/icons/Play.svg"
-                    }
-                    alt=""
-                    className="controls-button-icon"
-                  /> */}
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    height="28px"
+                    viewBox="0 -960 960 960"
+                    width="28px"
+                    fill="var(--md-sys-color-on-background)"
+                  >
+                    {isPlaying ? (
+                      <path d="M560-240v-480h140v480H560Zm-300 0v-480h140v480H260Z" />
+                    ) : (
+                      <path d="M360-272.31v-415.38L686.15-480 360-272.31Z" />
+                    )}
+                  </svg>
                 </button>
               </div>
             </div>
-            <div className="button">add to playlist</div>
-            <div className="button">add to queue</div>
+            <div className="button">
+              <button className="controls-button">
+                <img
+                  src="http://127.0.0.1:8000/api/static/icons/Like.svg"
+                  alt=""
+                  className="controls-button-icon"
+                />
+              </button>
+            </div>
+            <div className="button">
+              <button className="controls-button">
+                <img
+                  src="http://127.0.0.1:8000/api/static/icons/Playlist_add.svg"
+                  alt=""
+                  className="controls-button-icon"
+                />
+              </button>
+            </div>
           </div>
+          <md-tabs>
+            <md-primary-tab>Home</md-primary-tab>
+            <md-primary-tab>Albums</md-primary-tab>
+            <md-primary-tab>Singles</md-primary-tab>
+            <md-primary-tab>About</md-primary-tab>
+          </md-tabs>
+          <md-list>
+            {songs.map((song) => (
+              <md-list-item></md-list-item>
+            ))}
+          </md-list>
           <div className="song-list">
             {songs.map((song) => (
               <div className="song-item" key={song.id}>
@@ -213,15 +277,19 @@ export function Artist_Info() {
                     }}
                   >
                     <button className="controls-button play-pause">
-                      <img
-                        src={
-                          isPlaying && (playing.id === song.id)
-                            ? "http://127.0.0.1:8000/api/static/icons/Pause.svg"
-                            : "http://127.0.0.1:8000/api/static/icons/Play.svg"
-                        }
-                        alt=""
-                        className="controls-button-icon"
-                      />
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        height="28px"
+                        viewBox="0 -960 960 960"
+                        width="28px"
+                        fill="var(--md-sys-color-on-background)"
+                      >
+                        {isPlaying ? (
+                          <path d="M560-240v-480h140v480H560Zm-300 0v-480h140v480H260Z" />
+                        ) : (
+                          <path d="M360-272.31v-415.38L686.15-480 360-272.31Z" />
+                        )}
+                      </svg>
                     </button>
                   </div>
                 </div>
@@ -272,11 +340,6 @@ export function Album_Info() {
     <div className="body">
       <Header destination="Album Info" />
       <div className="info">
-        <div className="thumbnail-section">
-          <div className="large-thumbnail">
-            <img src={item.cover_image_url} className="large-thumbnail-image" />
-          </div>
-        </div>
         <div className="info-section">
           <div className="song-name">{item.title}</div>
           <div className="options">
@@ -284,18 +347,38 @@ export function Album_Info() {
               <div className="controls">
                 <button
                   className="controls-button play-pause"
-                  // onClick={handlePlayButton}
+                  onClick={handlePlayButton}
                 >
-                  <img
-                    src={"http://127.0.0.1:8000/api/static/icons/Play.svg"}
-                    alt=""
-                    className="controls-button-icon"
-                  />
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    height="28px"
+                    viewBox="0 -960 960 960"
+                    width="28px"
+                    fill="var(--md-sys-color-on-background)"
+                  >
+                    <path d="M360-272.31v-415.38L686.15-480 360-272.31Z" />
+                  </svg>
                 </button>
               </div>
             </div>
-            <div className="button">add to playlist</div>
-            <div className="button">add to queue</div>
+            <div className="button">
+              <button className="controls-button">
+                <img
+                  src="http://127.0.0.1:8000/api/static/icons/Playlist_add.svg"
+                  alt=""
+                  className="controls-button-icon"
+                />
+              </button>
+            </div>
+            <div className="button">
+              <button className="controls-button">
+                <img
+                  src="http://127.0.0.1:8000/api/static/icons/Like.svg"
+                  alt=""
+                  className="controls-button-icon"
+                />
+              </button>
+            </div>
           </div>
           <div className="song-list">
             {songs.map((song) => (
@@ -321,15 +404,19 @@ export function Album_Info() {
                     }}
                   >
                     <button className="controls-button play-pause">
-                      <img
-                        src={
-                          isPlaying & (playing.id === song.id)
-                            ? "http://127.0.0.1:8000/api/static/icons/Pause.svg"
-                            : "http://127.0.0.1:8000/api/static/icons/Play.svg"
-                        }
-                        alt=""
-                        className="controls-button-icon"
-                      />
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        height="28px"
+                        viewBox="0 -960 960 960"
+                        width="28px"
+                        fill="var(--md-sys-color-on-background)"
+                      >
+                        {isPlaying ? (
+                          <path d="M560-240v-480h140v480H560Zm-300 0v-480h140v480H260Z" />
+                        ) : (
+                          <path d="M360-272.31v-415.38L686.15-480 360-272.31Z" />
+                        )}
+                      </svg>
                     </button>
                   </div>
                 </div>
@@ -338,6 +425,11 @@ export function Album_Info() {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+        <div className="thumbnail-section">
+          <div className="large-thumbnail">
+            <img src={item.cover_image_url} className="large-thumbnail-image" />
           </div>
         </div>
       </div>
@@ -386,11 +478,6 @@ export function Playlist_Info() {
     <div className="body">
       <Header destination="Playlist Info" />
       <div className="info">
-        <div className="thumbnail-section">
-          <div className="large-thumbnail">
-            <img src={item.cover_image_url} className="large-thumbnail-image" />
-          </div>
-        </div>
         <div className="info-section">
           <div className="song-name">{item.name}</div>
           <div className="options">
@@ -400,11 +487,15 @@ export function Playlist_Info() {
                   className="controls-button play-pause"
                   onClick={handlePlayButton}
                 >
-                  <img
-                    src={"http://127.0.0.1:8000/api/static/icons/Play.svg"}
-                    alt=""
-                    className="controls-button-icon"
-                  />
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    height="28px"
+                    viewBox="0 -960 960 960"
+                    width="28px"
+                    fill="var(--md-sys-color-on-background)"
+                  >
+                    <path d="M360-272.31v-415.38L686.15-480 360-272.31Z" />
+                  </svg>
                 </button>
               </div>
             </div>
@@ -435,15 +526,19 @@ export function Playlist_Info() {
                     }}
                   >
                     <button className="controls-button play-pause">
-                      <img
-                        src={
-                          isPlaying & (playing.id === song.id)
-                            ? "http://127.0.0.1:8000/api/static/icons/Pause.svg"
-                            : "http://127.0.0.1:8000/api/static/icons/Play.svg"
-                        }
-                        alt=""
-                        className="controls-button-icon"
-                      />
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        height="28px"
+                        viewBox="0 -960 960 960"
+                        width="28px"
+                        fill="var(--md-sys-color-on-background)"
+                      >
+                        {isPlaying ? (
+                          <path d="M560-240v-480h140v480H560Zm-300 0v-480h140v480H260Z" />
+                        ) : (
+                          <path d="M360-272.31v-415.38L686.15-480 360-272.31Z" />
+                        )}
+                      </svg>
                     </button>
                   </div>
                 </div>
@@ -452,6 +547,11 @@ export function Playlist_Info() {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+        <div className="thumbnail-section">
+          <div className="large-thumbnail">
+            <img src={item.cover_image_url} className="large-thumbnail-image" />
           </div>
         </div>
       </div>

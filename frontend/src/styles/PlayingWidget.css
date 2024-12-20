@@ -1,6 +1,7 @@
-.playing-widget{
+.playing-widget {
     /* border: 2px solid black; */
-    background-color: rgba(255, 255, 255, 0.8);
+    background-color: var(--md-sys-color-surface-container-high);
+    color: var(--md-sys-color-on-surface);
     display: flex;
     height: 72px;
     align-items: center;
@@ -11,37 +12,45 @@
     bottom: 0;
     right: 0;
 }
-.seek-bar-section{
+
+.seek-bar-section {
     width: 240px;
 }
-.widget-center-section{
+
+.widget-center-section {
     flex: 1;
     display: flex;
 }
-.widget-right-section{
+
+.widget-right-section {
     display: flex;
 }
-.widget-thumbnail{
+
+.widget-thumbnail {
     padding: 2px;
 }
-.widget-thumbnail-image{
+
+.widget-thumbnail-image {
     height: 60px;
     width: 60px;
     border-radius: 10%;
 }
-.widget-left-section{
+
+.widget-left-section {
     width: 240px;
     display: flex;
     align-items: center;
     justify-content: space-around;
 }
-.widget-right-section{
+
+.widget-right-section {
     width: 192px;
     display: flex;
     align-items: center;
     justify-content: space-around;
 }
-.controls-button{
+
+.controls-button {
     height: 40px;
     width: 40px;
     border: 0;
@@ -49,20 +58,32 @@
     padding: 6px;
     border-radius: 50%;
 }
-.playing-widget .controls :hover, .playing-page .controls :hover{
+
+.playing-widget .controls :hover,
+.playing-page .controls :hover {
     background-color: var(--md-sys-color-secondary-container);
 }
-.play-pause{
+
+.playing-widget .play-pause-controls :hover,
+.playing-page .play-pause-controls :hover {
+    background-color: var(--md-sys-color-primary);
+}
+
+.play-pause {
     background-color: var(--md-sys-color-primary-container);
 }
 
-.playing-page{
-    background-color: rgba(255, 255, 255, 1);
+.play-pause:hover {
+    background-color: var(--md-sys-color-primary);
+}
+
+.playing-page {
+    background-color: var(--md-sys-color-surface-container-high);
     display: flex;
     justify-content: space-around;
     height: auto;
     width: auto;
-    align-items: center;
+    align-items: start;
     border-radius: 20px;
     position: fixed;
     z-index: 2;
@@ -71,74 +92,109 @@
     bottom: 0;
     right: 0;
 }
-.full-left-section{
+
+.full-left-section {
     display: flex;
     flex-direction: column;
     padding: 20px;
 }
-.full-left-section .seek-bar-section{
+
+.full-left-section .seek-bar-section {
     width: 400px;
     padding: 10px;
 }
-.left-title-section{
+
+.left-title-section {
     padding: 0px 20px;
 }
-.left-title-section .title{
+
+.left-title-section .title {
     font-size: 36px;
 }
-.extra-controls-section{
+
+.extra-controls-section {
     display: flex;
 }
-.controls-section{
+
+.controls-section {
     display: flex;
     align-items: center;
     justify-content: space-evenly;
 }
-.controls-section .controls-button{
+
+.controls-section .controls-button {
     height: 60px;
     width: 60px;
     /* display: flex;
     align-items: center;
     justify-content: center; */
 }
-.controls-section .play-pause{
+
+.controls-section .play-pause {
     height: 80px;
     width: 80px;
 }
-.full-right-section{
-    height: inherit;
-}
-.song-list{
 
+.full-right-section {
+    padding: 20px;
+    align-items: center;
+    height: 580px;
 }
-.full-right-section .song-list .song-item{
+
+.song-queue-list {
+    display: grid;
+    height: inherit;
+    --visible-rows: 8;
+    --row-size: calc(100% / var(--visible-rows));
+
+    grid-auto-flow: row;
+    grid-auto-rows: var(--row-size);
+    overflow-y: auto;
+}
+
+.song-queue-list .song-item {
     width: 400px;
+    height: max-content;
+    padding: 2px;
 }
-.full-right-section .song-list .song-item .song-item-thumbnail-image{
+
+.song-queue-list .song-item-image {
     height: 60px;
     width: 60px;
 }
-.tab-switch{
+
+.tab-switch {
+    height: 40px;
     display: flex;
+    justify-content: space-evenly;
+    padding: 10px;
 }
+
 @media (min-width: 600px) and (max-width: 1200px) {
-    .playing-widget, .playing-page {
+
+    .playing-widget,
+    .playing-page {
         left: 80px;
     }
 }
 
 @media (min-width: 1200px) {
-    .playing-widget, .playing-page {
+
+    .playing-widget,
+    .playing-page {
         left: 240px;
     }
 }
 
 @media (max-width: 600px) {
-    .playing-widget, .playing-page {
+
+    .playing-widget,
+    .playing-page {
         left: 0px;
         bottom: 80px;
     }
-    .playing-page{
+
+    .playing-page {
         flex-direction: column;
     }
 }

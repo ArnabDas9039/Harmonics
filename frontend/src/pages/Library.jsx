@@ -2,6 +2,7 @@ import Header from "../components/Header";
 import { useContext, useEffect, useState } from "react";
 import api from "../api";
 import {
+  AlbumThumbnail,
   ArtistThumbnail,
   MediumThumbnail,
   PlaylistThumbnail,
@@ -104,7 +105,7 @@ function Library() {
         </div>
         <div className="medium-thumbnails">
           {library.liked_albums.map((song) => (
-            <PlaylistThumbnail item={song} key={song.id} />
+            <AlbumThumbnail item={song} key={song.id} />
           ))}
         </div>
       </>
