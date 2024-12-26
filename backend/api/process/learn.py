@@ -60,7 +60,7 @@ def cluster():
 
         return True
     except Exception as e:
-        print(f"Error clustering songs: {e}")
+        # print(f"Error clustering songs: {e}")
         return None
 
 
@@ -102,5 +102,5 @@ def recommend_songs(song_id, num_recommendations=10):
 
 
 def process_radio(songs):
-    print(songs[0])
+    # print(songs[0])
     return songs + recommend_songs(songs[0])

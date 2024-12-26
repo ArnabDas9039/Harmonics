@@ -328,9 +328,9 @@ class CreateRadioView(generics.CreateAPIView):
     def post(self, request, *args, **kwargs):
         # queuemodifier = RadioCreate(data=request.data)
         if request.data["seed"]:
-            print(f"{request.data["results"]} {type(request.data["results"])}")
+            # print(f"{request.data["results"]} {type(request.data["results"])}")
             request.data["results"] = learn.process_radio(request.data["seed"])
-            print(f"{request.data["results"]} {type(request.data["results"])}")
+            # print(f"{request.data["results"]} {type(request.data["results"])}")
             serializer = CreateRadioSerializer(data=request.data)
             if serializer.is_valid():
                 serializer.save(user=request.user)
