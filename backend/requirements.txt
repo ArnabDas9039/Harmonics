@@ -15,3 +15,4 @@ websockets
 scikit-learn
 librosa
 numpy
+pandas
