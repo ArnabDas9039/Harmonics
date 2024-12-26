@@ -12,3 +12,6 @@ Pillow
 channels
 uvicorn
 websockets
+scikit-learn
+librosa
+numpy

@@ -5,6 +5,32 @@ import api from "../api";
 import PlayingContext from "../contexts/PlayingContext";
 import { Link } from "react-router-dom";
 import "../styles/Info.css";
+import { GridThumbnail } from "../components/Thumbnails";
+
+const ReadMore = ({ text, limit = 100 }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+  useEffect(() => {
+    if (text.length < limit) {
+      setIsExpanded(true);
+    }
+  });
+  const toggleReadMore = () => {
+    setIsExpanded(!isExpanded);
+  };
+
+  return (
+    <div>
+      {/* {isExpanded ? text : `${text.slice(0, limit)}...`} */}
+      {isExpanded ? text : text}
+      <button
+        onClick={toggleReadMore}
+        style={{ marginLeft: "5px", cursor: "pointer" }}
+      >
+        {isExpanded ? "Show Less" : "Read More"}
+      </button>
+    </div>
+  );
+};
 
 export function Song_Info() {
   const { song_id } = useParams();
@@ -149,12 +175,20 @@ export function Artist_Info() {
   const { artist_id } = useParams();
   const [item, setItem] = useState({});
   const [songs, setSongs] = useState([]);
+  const [isExpanded, setIsExpanded] = useState(false);
   const { playing, setPlaying, isPlaying, setIsPlaying } =
     useContext(PlayingContext);
 
   useEffect(() => {
     getItem();
+    if (item.bio && item.bio.length > 50) {
+      setIsExpanded(false);
+    }
   }, []);
+
+  const toggleReadMore = () => {
+    setIsExpanded(!isExpanded);
+  };
 
   const handlePlayButton = () => {
     if (playing.id === item.id) {
@@ -166,8 +200,8 @@ export function Artist_Info() {
     console.log(item.file_url);
   };
 
-  const getItem = () => {
-    api
+  const getItem = async () => {
+    await api
       .get(`/api/artist/${artist_id}`)
       .then((res) => res.data)
       .then((data) => {
@@ -176,6 +210,17 @@ export function Artist_Info() {
         // console.log(data);
       })
       .catch((err) => alert(err));
+  };
+
+  const handlefollow = async () => {
+    try {
+      const response = await api.put("/api/library/post/artist/", {
+        artist_id: item.id,
+      });
+      console.log(response.data);
+    } catch (err) {
+      console.log(err);
+    }
   };
   return (
     <div className="body">
@@ -190,23 +235,22 @@ export function Artist_Info() {
           </div>
         </div>
         <div className="artist-info-section">
-          <div className="artist-thumbnail-section">
-            <div className="thumbnail">
-              <img
-                src={item.profile_image_url}
-                alt=""
-                className="artist-image"
-              />
-            </div>
-          </div>
           <div className="artist-name">{item.name}</div>
+          {item.bio && (
+            <div className="artist-bio">
+              {isExpanded ? item.bio : `${item.bio.slice(0, 50)}...`}
+              <button
+                onClick={toggleReadMore}
+                style={{ marginLeft: "5px", cursor: "pointer" }}
+              >
+                {isExpanded ? "Show Less" : "Read More"}
+              </button>
+            </div>
+          )}
           <div className="options">
             <div className="button">
               <div className="controls">
-                <button
-                  className="controls-button play-pause"
-                  // onClick={handlePlayButton}
-                >
+                <button className="controls-button play-pause">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     height="28px"
@@ -224,15 +268,14 @@ export function Artist_Info() {
               </div>
             </div>
             <div className="button">
-              <button className="controls-button">
-                <img
-                  src="http://127.0.0.1:8000/api/static/icons/Like.svg"
-                  alt=""
-                  className="controls-button-icon"
-                />
+              <button
+                className="controls-button play-pause"
+                onClick={handlefollow}
+              >
+                Follow
               </button>
             </div>
-            <div className="button">
+            {/* <div className="button">
               <button className="controls-button">
                 <img
                   src="http://127.0.0.1:8000/api/static/icons/Playlist_add.svg"
@@ -240,63 +283,11 @@ export function Artist_Info() {
                   className="controls-button-icon"
                 />
               </button>
-            </div>
+            </div> */}
           </div>
-          <md-tabs>
-            <md-primary-tab>Home</md-primary-tab>
-            <md-primary-tab>Albums</md-primary-tab>
-            <md-primary-tab>Singles</md-primary-tab>
-            <md-primary-tab>About</md-primary-tab>
-          </md-tabs>
-          <md-list>
+          <div className="grid-thumbnails">
             {songs.map((song) => (
-              <md-list-item></md-list-item>
-            ))}
-          </md-list>
-          <div className="song-list">
-            {songs.map((song) => (
-              <div className="song-item" key={song.id}>
-                <div className="song-item-thumbnail-section">
-                  <div className="song-item-thumbnail">
-                    <img
-                      src={song.cover_image_url}
-                      alt=""
-                      className="song-item-image"
-                    />
-                  </div>
-                  <div
-                    className="overlay"
-                    onClick={() => {
-                      if (playing.id === song.id) {
-                        setIsPlaying(!isPlaying);
-                      } else {
-                        setPlaying(song);
-                        setIsPlaying(true);
-                      }
-                      console.log(song.file_url);
-                    }}
-                  >
-                    <button className="controls-button play-pause">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        height="28px"
-                        viewBox="0 -960 960 960"
-                        width="28px"
-                        fill="var(--md-sys-color-on-background)"
-                      >
-                        {isPlaying ? (
-                          <path d="M560-240v-480h140v480H560Zm-300 0v-480h140v480H260Z" />
-                        ) : (
-                          <path d="M360-272.31v-415.38L686.15-480 360-272.31Z" />
-                        )}
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-                <div className="song-item-name">
-                  <Link to={"/info/" + song.id}>{song.title}</Link>
-                </div>
-              </div>
+              <GridThumbnail item={song} key={song.id} />
             ))}
           </div>
         </div>

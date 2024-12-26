@@ -13,6 +13,7 @@ myModels = [
     UserFeed,
     CreatedFeed,
     Radio,
+    SongFeature,
 ]
 
 admin.site.register(myModels)

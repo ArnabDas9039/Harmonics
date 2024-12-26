@@ -1,6 +1,5 @@
 from django.db import models
 from django.contrib.auth.models import User
-from django.contrib.postgres.fields import ArrayField
 
 
 # Create your models here.
@@ -138,3 +137,19 @@ class Radio(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     seed = models.ManyToManyField(Song, blank=False, related_name="seeds")
     results = models.ManyToManyField(Song, blank=False, related_name="results")
+
+
+class SongFeature(models.Model):
+    song = models.ForeignKey(Song, on_delete=models.CASCADE)
+    tempo = models.FloatField()
+    energy = models.FloatField()
+    loudness = models.FloatField()
+    key = models.CharField(max_length=2)
+    mode = models.IntegerField()
+    danceability = models.FloatField()
+    valence = models.FloatField()
+    duration = models.FloatField()
+    cluster_label = models.IntegerField(default=-1)
+
+    def __str__(self):
+        return f"{self.song.title}"

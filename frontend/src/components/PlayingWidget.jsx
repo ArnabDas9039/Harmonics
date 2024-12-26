@@ -1,10 +1,12 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import "../styles/PlayingWidget.css";
 import "../styles/General.css";
+import "../styles/Feed.css";
 import PlayingContext from "../contexts/PlayingContext";
 import SeekBar from "./SeekBar";
 import api from "../api";
 import { Link } from "react-router-dom";
+import { GridThumbnail } from "./Thumbnails";
 
 function PlayingWidget() {
   const audioRef = useRef(null);
@@ -42,9 +44,18 @@ function PlayingWidget() {
 
   const fetchRadio = async () => {
     try {
-      const response = await api.get("api/radio/");
-      // console.log(response.data[0]);
-      setQueue(response.data[0].results);
+      const response = await api.post("api/radio/post/", {
+        seed: [playing.id],
+        results: [playing.id],
+      });
+      if (response.status === 201) {
+        try {
+          const result = await api.get(`api/radio/${response.data.id}`);
+          setQueue(result.data.results);
+        } catch (err) {
+          alert(err);
+        }
+      }
     } catch (err) {
       alert(err);
     } finally {
@@ -53,7 +64,10 @@ function PlayingWidget() {
   };
 
   useEffect(() => {
-    fetchRadio();
+    if (queue.length === 0) {
+      fetchRadio();
+    }
+    handleHistory();
     // if (isPlaying) {
     //   const newTimer = setTimeout(() => {
     //     handleHistory();
@@ -110,8 +124,12 @@ function PlayingWidget() {
 
   const handleLike = async () => {
     try {
-      const response = api.put("api/library/post/", { song_id: playing.id });
-      // console.log(response);
+      const response = api.put("api/library/post/song/", {
+        song_id: playing.id,
+      });
+      if (response.status === 201) {
+        alert("Song added to library");
+      }
     } catch (err) {
       alert(err);
     }
@@ -155,13 +173,18 @@ function PlayingWidget() {
     setCurrentTime(seekTime);
   };
 
-  const handlePlaylistAdd = async () => {
-    try {
-      await api.patch("api/playlist/p1/update/", { song_id: playing.id });
-    } catch (error) {
-      alert(error);
-    }
-  };
+  // const handlePlaylistAdd = async () => {
+  //   try {
+  //     const response = await api.patch("api/playlist/p1/update/", {
+  //       song_id: playing.id,
+  //     });
+  //     if (response.status === 201) {
+  //       alert("Song added to Defualt Playlist");
+  //     }
+  //   } catch (error) {
+  //     alert(error);
+  //   }
+  // };
 
   if (playing === null) {
     return (
@@ -237,8 +260,6 @@ function PlayingWidget() {
                   .toString()
                   .padStart(2, "0")}
               </div>
-              {/* ) : ( */}
-              {/* )} */}
             </div>
             <div className="extra-controls-section">
               <div className="controls">
@@ -267,8 +288,8 @@ function PlayingWidget() {
                   </svg>
                 </button>
               </div>
-              <div className="controls">
-                <button className="controls-button">
+              {/* <div className="controls">
+                <button className="controls-button" onClick={handlePlaylistAdd}>
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     height="28px"
@@ -279,7 +300,7 @@ function PlayingWidget() {
                     <path d="M140-340v-40h280v40H140Zm0-160v-40h440v40H140Zm0-160v-40h440v40H140Zm520 480v-160H500v-40h160v-160h40v160h160v40H700v160h-40Z" />
                   </svg>
                 </button>
-              </div>
+              </div> */}
               <div className="controls">
                 <button className="controls-button" onClick={handlearrowbutton}>
                   <svg
@@ -289,7 +310,11 @@ function PlayingWidget() {
                     width="28px"
                     fill="var(--md-sys-color-on-background)"
                   >
-                    <path d="M327.69-420 480-572.31 632.31-420H327.69Z" />
+                    {showPlayingPage ? (
+                      <path d="M480-360 280-560h400L480-360Z" />
+                    ) : (
+                      <path d="M327.69-420 480-572.31 632.31-420H327.69Z" />
+                    )}
                   </svg>
                 </button>
               </div>
@@ -377,55 +402,10 @@ function PlayingWidget() {
             </div>
           </div>
           <div className="full-right-section">
-            <md-tabs>
-              <md-primary-tab>Up Next</md-primary-tab>
-              <md-primary-tab>Lyrics</md-primary-tab>
-              <md-primary-tab>Related</md-primary-tab>
-            </md-tabs>
-            <div className="song-queue-list">
+            <div className="tab">Up Next</div>
+            <div className="song-queue-list queue-thumbnails">
               {queue.map((song) => (
-                <div className="song-item" key={song.id}>
-                  <div className="song-item-thumbnail-section">
-                    <div className="song-item-thumbnail">
-                      <img
-                        src={song.cover_image_url}
-                        alt=""
-                        className="song-item-image"
-                      />
-                    </div>
-                    <div
-                      className="overlay"
-                      onClick={() => {
-                        if (playing.id === song.id) {
-                          setIsPlaying(!isPlaying);
-                        } else {
-                          setPlaying(song);
-                          setIsPlaying(true);
-                        }
-                        // console.log(song.file_url);
-                      }}
-                    >
-                      <button className="controls-button play-pause">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          height="28px"
-                          viewBox="0 -960 960 960"
-                          width="28px"
-                          fill="var(--md-sys-color-on-background)"
-                        >
-                          {isPlaying ? (
-                            <path d="M560-240v-480h140v480H560Zm-300 0v-480h140v480H260Z" />
-                          ) : (
-                            <path d="M360-272.31v-415.38L686.15-480 360-272.31Z" />
-                          )}
-                        </svg>
-                      </button>
-                    </div>
-                  </div>
-                  <div className="song-item-name">
-                    <Link to={"/info/" + song.id}>{song.title}</Link>
-                  </div>
-                </div>
+                <GridThumbnail item={song} key={song.id} />
               ))}
             </div>
           </div>
@@ -533,9 +513,6 @@ function PlayingWidget() {
                   .padStart(2, "0")}
               </div>
             </>
-            {/* ) : ( */}
-            <></>
-            {/* )} */}
           </div>
           <div className="widget-center-section">
             <div className="widget-thumbnail">
@@ -547,8 +524,7 @@ function PlayingWidget() {
             </div>
             <div className="widget-title-section">
               <div className="title">
-                {playing && playing.title}
-                {/* {isPlaying ?  : "Nothing is playing"} */}
+                <b>{playing && playing.title}</b>
               </div>
               <div className="title-info">
                 {playing.artist.map((person) => (
@@ -561,7 +537,7 @@ function PlayingWidget() {
           </div>
           <div className="widget-right-section">
             <div className="controls">
-              <button className="controls-button">
+              <button className="controls-button" onClick={handleLike}>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   height="28px"
@@ -586,7 +562,7 @@ function PlayingWidget() {
                 </svg>
               </button>
             </div>
-            <div className="controls">
+            {/* <div className="controls">
               <button className="controls-button" onClick={handlePlaylistAdd}>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -598,7 +574,7 @@ function PlayingWidget() {
                   <path d="M140-340v-40h280v40H140Zm0-160v-40h440v40H140Zm0-160v-40h440v40H140Zm520 480v-160H500v-40h160v-160h40v160h160v40H700v160h-40Z" />
                 </svg>
               </button>
-            </div>
+            </div> */}
             <div className="controls">
               <button className="controls-button" onClick={handlearrowbutton}>
                 <svg

@@ -1,6 +1,5 @@
 import { useContext, useState } from "react";
 import api from "../api";
-import { redirect, useNavigate } from "react-router-dom";
 import { ACCESS_TOKEN, REFRESH_TOKEN, USERNAME } from "../constants";
 import "../styles/Form.css";
 import AuthContext from "../contexts/AuthContext";
@@ -10,7 +9,6 @@ function Login() {
   const [password, setPassword] = useState("");
   const { isAuthorized, setIsAuthorized, user, setUser } =
     useContext(AuthContext);
-  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -25,9 +23,8 @@ function Login() {
       setUser(username);
 
       history.back();
-      // navigate("/");
     } catch (error) {
-      alert(error);
+      alert("Invalid username or password");
     }
   };
 

@@ -11,6 +11,7 @@ from .mypaginations import MyLimitOffsetPagination
 from django.shortcuts import get_object_or_404
 import random
 import logging
+from .process import learn
 
 logger = logging.getLogger(__name__)
 
@@ -234,7 +235,7 @@ class CreateLibraryView(generics.CreateAPIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class UpdateLibraryView(generics.UpdateAPIView):
+class UpdateLibrarySongView(generics.UpdateAPIView):
     serializer_class = CreateLibrarySerializer
     permission_classes = [IsAuthenticated]
 
@@ -272,14 +273,52 @@ class UpdateLibraryView(generics.UpdateAPIView):
         return obj
 
 
-class RadioView(generics.ListAPIView):
+class UpdateLibraryArtistView(generics.UpdateAPIView):
+    serializer_class = CreateLibrarySerializer
+    permission_classes = [IsAuthenticated]
+
+    def put(self, request):
+        try:
+            library = self.get_object()
+
+            artist_id = request.data.get("artist_id")
+            if not artist_id:
+                return Response(
+                    {"detail": "artist not provided"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            try:
+                song = Artist.objects.get(id=artist_id)
+            except Artist.DoesNotExist:
+                return Response(
+                    {"detail": "artist not found"}, status=status.HTTP_404_NOT_FOUND
+                )
+
+            library.followed_artists.add(song)
+            library.save()
+
+            serializer = self.serializer_class(library)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        except UserLibrary.DoesNotExist:
+            return Response(
+                {"detail": "Library not found"}, status=staus.HTTP_404_NOT_FOUND
+            )
+
+    def get_object(self):
+        queryset = UserLibrary.objects.all()
+        obj = generics.get_object_or_404(queryset, user=self.request.user)
+        # logger.debug()
+        return obj
+
+
+class RadioView(generics.RetrieveAPIView):
     serializer_class = RadioSerializer
     permission_classes = [IsAuthenticated]
-    pagination_class = MyLimitOffsetPagination
+    lookup_field = "id"
 
     def get_queryset(self):
-        user = self.request.user
-        return Radio.objects.filter(user=user)
+        return Radio.objects.all()
 
 
 class CreateRadioView(generics.CreateAPIView):
@@ -288,9 +327,13 @@ class CreateRadioView(generics.CreateAPIView):
 
     def post(self, request, *args, **kwargs):
         # queuemodifier = RadioCreate(data=request.data)
-        serializer = CreateRadioSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save(user=request.user)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        if request.data["seed"]:
+            print(f"{request.data["results"]} {type(request.data["results"])}")
+            request.data["results"] = learn.process_radio(request.data["seed"])
+            print(f"{request.data["results"]} {type(request.data["results"])}")
+            serializer = CreateRadioSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save(user=request.user)
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
         logger.error("Validation errors: %s", serializer.errors)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

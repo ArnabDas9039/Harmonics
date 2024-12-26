@@ -1,12 +1,23 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
-from .models import *
+from .models import (
+    Genre,
+    Artist,
+    Song,
+    Album,
+    Playlist,
+    UserLibrary,
+    UserFeed,
+    CreatedFeed,
+    UserListeningHistory,
+    Radio,
+)
 
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ["username"]
+        fields = ["username", "password"]
         extra_kwargs = {"password": {"write_only": True}}
 
     def create(self, validated_data):
@@ -143,7 +154,7 @@ class RadioSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Radio
-        fields = ["results"]
+        fields = "__all__"
 
 
 class CreateRadioSerializer(serializers.ModelSerializer):
