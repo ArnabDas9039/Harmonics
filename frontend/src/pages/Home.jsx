@@ -93,11 +93,17 @@ function Home() {
                 <b>Quick Picks</b>
               </div>
             </div>
-            <div className="grid-thumbnails">
-              {userFeed.quick_picks.map((item) => (
-                <GridThumbnail item={item} key={item.id} />
-              ))}
-            </div>
+            {userFeed.quick_picks.length === 0 ? (
+              <div className="empty-text">
+                Listen to more songs to get recommendations
+              </div>
+            ) : (
+              <div className="grid-thumbnails">
+                {userFeed.quick_picks.map((item) => (
+                  <GridThumbnail item={item} key={item.id} />
+                ))}
+              </div>
+            )}
             <div className="heading-section">
               <div className="heading">
                 <b>Recommended</b>

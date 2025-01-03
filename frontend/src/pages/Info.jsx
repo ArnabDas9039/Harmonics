@@ -268,10 +268,7 @@ export function Artist_Info() {
               </div>
             </div>
             <div className="button">
-              <button
-                className="controls-button play-pause"
-                onClick={handlefollow}
-              >
+              <button className="controls-button" onClick={handlefollow}>
                 Follow
               </button>
             </div>

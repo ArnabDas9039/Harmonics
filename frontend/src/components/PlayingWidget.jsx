@@ -64,10 +64,12 @@ function PlayingWidget() {
   };
 
   useEffect(() => {
-    if (queue.length === 0) {
-      fetchRadio();
+    if (playing) {
+      if (queue.length === 0) {
+        fetchRadio();
+      }
+      handleHistory();
     }
-    handleHistory();
     // if (isPlaying) {
     //   const newTimer = setTimeout(() => {
     //     handleHistory();

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import Header from "../components/Header";
 import api from "../api";
-import "../styles/Profile.css"
+import "../styles/Profile.css";
 import { Link, useParams } from "react-router-dom";
 
 function Profile() {
@@ -9,7 +9,7 @@ function Profile() {
   const { username } = useParams();
 
   useEffect(() => {
-      getProfile();
+    getProfile();
   }, []);
 
   const getProfile = () => {
@@ -36,7 +36,9 @@ function Profile() {
         </div>
         <div className="info-section"></div>
       </div>
-      <Link to="/logout">Logout</Link>
+      <div className="Logout-button">
+        <Link to="/logout">Logout</Link>
+      </div>
     </div>
   );
 }

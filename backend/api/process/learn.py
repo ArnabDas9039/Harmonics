@@ -46,7 +46,7 @@ def cluster():
         song_cluster_pipeline = Pipeline(
             [
                 ("scaler", StandardScaler()),
-                ("kmeans", KMeans(n_clusters=1, random_state=42)),
+                ("kmeans", KMeans(n_clusters=10, random_state=42)),
             ]
         )
 
