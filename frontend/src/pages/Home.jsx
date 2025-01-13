@@ -80,10 +80,10 @@ function Home() {
       <div className="feed">
         <div className="filters">
           {/* <md-chip-set> */}
-            {chips.map((chip, index) => (
-              // <md-filter-chip label={chip} key={index}></md-filter-chip>
-              <Filter_chip name={chip} key={index} />
-            ))}
+          {chips.map((chip, index) => (
+            // <md-filter-chip label={chip} key={index}></md-filter-chip>
+            <Filter_chip name={chip} key={index} />
+          ))}
           {/* </md-chip-set> */}
         </div>
         {isAuthorized === true && (
@@ -93,21 +93,33 @@ function Home() {
                 <b>Quick Picks</b>
               </div>
             </div>
-            <div className="grid-thumbnails">
-              {userFeed.quick_picks.map((item) => (
-                <GridThumbnail item={item} key={item.id} />
-              ))}
-            </div>
+            {userFeed.quick_picks.length === 0 ? (
+              <div className="empty-text">
+                Listen to more songs to get recommendations
+              </div>
+            ) : (
+              <div className="grid-thumbnails">
+                {userFeed.quick_picks.map((item) => (
+                  <GridThumbnail item={item} key={item.id} />
+                ))}
+              </div>
+            )}
             <div className="heading-section">
               <div className="heading">
                 <b>Recommended</b>
               </div>
             </div>
-            <div className="medium-thumbnails">
-              {userFeed.recommended_songs.map((item) => (
-                <MediumThumbnail item={item} key={item.id} />
-              ))}
-            </div>
+            {userFeed.recommended_songs.length === 0 ? (
+              <div className="empty-text">
+                Listen to more songs to get recommendations
+              </div>
+            ) : (
+              <div className="medium-thumbnails">
+                {userFeed.recommended_songs.map((item) => (
+                  <MediumThumbnail item={item} key={item.id} />
+                ))}
+              </div>
+            )}
             {/* <div className="heading-section">
               <div className="heading">
                 <b>Listen Again</b>
@@ -118,7 +130,7 @@ function Home() {
                 <b>From your library</b>
               </div>
             </div> */}
-            <div className="heading-section">
+            {/* <div className="heading-section">
               <div className="heading">
                 <b>Mixed for you</b>
               </div>
@@ -127,7 +139,7 @@ function Home() {
               {userFeed.mixes.map((item) => (
                 <PlaylistThumbnail item={item} key={item.id} />
               ))}
-            </div>
+            </div> */}
             {/* <div className="heading-section">
               <div className="heading">
                 <b>SIMILAR TO</b>
@@ -143,11 +155,17 @@ function Home() {
                 <b>Latest Releases from your following</b>
               </div>
             </div>
-            <div className="medium-thumbnails">
-              {userFeed.latest_from_following.map((item) => (
-                <MediumThumbnail item={item} key={item.id} />
-              ))}
-            </div>
+            {userFeed.latest_from_following.length === 0 ? (
+              <div className="empty-text">
+                Follow more artists to get their latest releases
+              </div>
+            ) : (
+              <div className="medium-thumbnails">
+                {userFeed.latest_from_following.map((item) => (
+                  <MediumThumbnail item={item} key={item.id} />
+                ))}
+              </div>
+            )}
           </>
         )}
         <div className="heading-section">

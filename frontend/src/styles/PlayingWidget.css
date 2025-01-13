@@ -22,6 +22,16 @@
     display: flex;
 }
 
+.widget-center-section a {
+    text-decoration: none;
+    color: inherit;
+}
+
+.widget-center-section a:hover {
+    text-decoration: underline;
+    color: inherit;
+}
+
 .widget-right-section {
     display: flex;
 }
@@ -99,6 +109,16 @@
     padding: 20px;
 }
 
+.full-left-section a {
+    text-decoration: none;
+    color: inherit;
+}
+
+.full-left-section a:hover {
+    text-decoration: underline;
+    color: inherit;
+}
+
 .full-left-section .seek-bar-section {
     width: 400px;
     padding: 10px;
@@ -136,6 +156,7 @@
 }
 
 .full-right-section {
+    width: 400px;
     padding: 20px;
     align-items: center;
     height: 580px;
@@ -144,7 +165,7 @@
 .song-queue-list {
     display: grid;
     height: inherit;
-    --visible-rows: 8;
+    --visible-rows: 6;
     --row-size: calc(100% / var(--visible-rows));
 
     grid-auto-flow: row;

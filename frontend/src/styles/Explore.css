@@ -1,34 +1,38 @@
-.heading-section{
+.heading-section {
     margin-top: 40px;
     padding-left: 30px;
 }
-.heading{
+
+.heading {
     font-size: 30px;
 }
-.explore-thumbnails{
+
+.explore-thumbnails {
     align-items: center;
     padding: 20px;
 
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
+    grid-template-columns: repeat(6, 1fr);
 }
-.info{
+
+.info {
     padding: 10px;
     position: relative;
 }
-.thumbnail-section{
+
+.thumbnail-section {
     height: max-content;
     position: relative;
 }
-.thumbnail{
-}
-.thumbnail-image{
+
+.thumbnail-image {
     height: 100%;
     width: 100%;
     object-fit: contain;
     border-radius: 10%;
 }
-.thumbnail-section .overlay{
+
+.thumbnail-section .overlay {
     --overlay-width: 40px;
     --overlay-height: 40px;
     height: var(--overlay-height);
@@ -37,7 +41,8 @@
     left: calc(50% - var(--overlay-width)/2);
     top: calc(50% - var(--overlay-height)/2);
 }
-.genre-name{
+
+.genre-name {
     position: absolute;
     left: 20px;
     top: 20px;

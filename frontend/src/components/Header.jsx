@@ -70,9 +70,14 @@ function Header(props) {
             </div>
           </Link>
         ) : (
-          <Link to="/login">
-            <div>Sign In</div>
-          </Link>
+          <>
+            <div className="login-button">
+              <Link to="/login">Log In</Link>
+            </div>
+            <div className="login-button">
+              <Link to="/register">Register</Link>
+            </div>
+          </>
         )}
       </div>
     </div>

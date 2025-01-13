@@ -1,28 +1,43 @@
-.info{
+.info {
     display: flex;
     padding: 20px;
 }
-.thumbnail-section{
-}
-.large-thumbnail{
+
+.thumbnail-section {}
+
+.large-thumbnail {
     height: 400px;
     width: 100%;
     padding: 10px;
 }
-.large-thumbnail-image{
+
+.large-thumbnail-image {
     height: inherit;
     object-fit: contain;
     border-radius: 20px;
 }
-.info-section{
+
+.info-section {
     flex: 1;
     padding: 10px;
 }
-.song-name{
+
+.song-name {
     font-size: 36px;
     font-weight: bolder;
 }
-.options{
+
+.options {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
+}
+
+.logout-button a {
+    text-decoration: none;
+    color: inherit;
+}
+
+.logout-button a:hover {
+    text-decoration: underline;
+    color: inherit;
 }
