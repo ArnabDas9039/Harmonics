@@ -1,11 +1,4 @@
-/* .feed{
-    position: relative;
-    padding-left: 20px;
-    top: 64px;
-    left: 240px;
-} */
 .filters {
-    /* flex-direction: row; */
     overflow: auto;
     white-space: nowrap;
     padding: 20px;
@@ -44,8 +37,6 @@
 }
 
 .grid-thumbnails {
-    display: grid;
-    /* align-items: center; */
     padding: 20px;
 
     --visible-cols: 3;
