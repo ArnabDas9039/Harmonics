@@ -5,7 +5,7 @@ import "../styles/Feed.css";
 import PlayingContext from "../contexts/PlayingContext";
 import SeekBar from "./SeekBar";
 import api from "../api";
-import RoomContext from "../contexts/RoomContext";
+// import RoomContext from "../contexts/RoomContext";
 import { Link } from "react-router-dom";
 import { GridThumbnail } from "./Thumbnails";
 
@@ -15,8 +15,8 @@ function PlayingWidget() {
   const [duration, setDuration] = useState(0);
   const { playing, setPlaying, isPlaying, setIsPlaying, queue, setQueue } =
     useContext(PlayingContext);
-  const { roomId, currentSong, syncTime, setSyncTime, isHost } =
-    useContext(RoomContext);
+  // const { roomId, currentSong, syncTime, setSyncTime, isHost } =
+  //   useContext(RoomContext);
   const [showPlayingPage, setShowPlayingPage] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [repeat, setRepeat] = useState(false);
@@ -34,9 +34,9 @@ function PlayingWidget() {
 
     handlePlayPause();
 
-    if (isHost) {
-      setSyncTime(currentTime);
-    }
+    // if (isHost) {
+    //   setSyncTime(currentTime);
+    // }
 
     return () => {
       audioRef.current.removeEventListener("play", handlePlay);
@@ -87,20 +87,20 @@ function PlayingWidget() {
         }
       }
 
-      if (isHost && roomId) {
-        const update = async () => {
-          try {
-            const res = await api.put(`api/room/${roomId}/update/`, {
-              song_id: playing.id,
-            });
-            console.log(res);
-          } catch (err) {
-            alert(err);
-          }
-        };
+      // if (isHost && roomId) {
+      //   const update = async () => {
+      //     try {
+      //       const res = await api.put(`api/room/${roomId}/update/`, {
+      //         song_id: playing.id,
+      //       });
+      //       console.log(res);
+      //     } catch (err) {
+      //       alert(err);
+      //     }
+      //   };
 
-        update();
-      }
+      //   update();
+      // }
 
       return () => {
         if (timer) {

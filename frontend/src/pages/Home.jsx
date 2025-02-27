@@ -60,10 +60,9 @@ function Home() {
 
           setUserFeed(UserResponse.data[0]);
         }
+        setIsLoading(false);
       } catch (err) {
         alert(err);
-      } finally {
-        setIsLoading(false);
       }
     };
 
@@ -86,7 +85,7 @@ function Home() {
           ))}
           {/* </md-chip-set> */}
         </div>
-        {isAuthorized === true && (
+        {isAuthorized && (
           <>
             <div className="heading-section">
               <div className="heading">
@@ -190,6 +189,16 @@ function Home() {
         </div>
         <div className="heading-section">
           <div className="heading">
+            <b>PLAYLISTS from the community</b>
+          </div>
+        </div>
+        <div className="medium-thumbnails">
+          {generalFeed.playlists.map((item) => (
+            <PlaylistThumbnail item={item} key={item.id} />
+          ))}
+        </div>
+        <div className="heading-section">
+          <div className="heading">
             <b>PLAYLISTS for the SEASON</b>
           </div>
         </div>
@@ -205,16 +214,6 @@ function Home() {
         </div>
         <div className="medium-thumbnails">
           {generalFeed.day_playlist.map((item) => (
-            <PlaylistThumbnail item={item} key={item.id} />
-          ))}
-        </div>
-        <div className="heading-section">
-          <div className="heading">
-            <b>PLAYLISTS from the community</b>
-          </div>
-        </div>
-        <div className="medium-thumbnails">
-          {generalFeed.playlists.map((item) => (
             <PlaylistThumbnail item={item} key={item.id} />
           ))}
         </div>

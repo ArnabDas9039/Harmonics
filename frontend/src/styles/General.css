@@ -35,25 +35,13 @@ body {
     border-radius: 28px;
 }
 
-.RoomContext {
+/* .RoomContext {
     position: fixed;
     background-color: red;
     left: 0;
     top: 0;
     z-index: 10;
-}
-
-@media (min-width: 600px) and (max-width: 1200px) {
-    .body {
-        padding-left: 80px;
-    }
-}
-
-@media (min-width: 1200px) {
-    .body {
-        padding-left: 240px;
-    }
-}
+} */
 
 @media (max-width: 600px) {
     .body {
@@ -71,6 +59,18 @@ body {
 
     .header {
         padding-left: 60px;
+    }
+}
+
+@media (min-width: 600px) and (max-width: 1200px) {
+    .body {
+        padding-left: 80px;
+    }
+}
+
+@media (min-width: 1200px) {
+    .body {
+        padding-left: 240px;
     }
 }
 

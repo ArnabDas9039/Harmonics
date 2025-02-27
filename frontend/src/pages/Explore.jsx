@@ -11,15 +11,14 @@ function Explore() {
     getGenres();
   }, []);
 
-  const getGenres = () => {
-    api
-      .get("/api/explore/")
-      .then((res) => res.data)
-      .then((data) => {
-        SetGenres(data);
-        // console.log(data);
-      })
-      .catch((err) => alert(err));
+  const getGenres = async () => {
+    try {
+      const response = await api.get("/api/explore/");
+      SetGenres(data);
+      // console.log(data);
+    } catch (err) {
+      alert(err);
+    }
   };
 
   return (

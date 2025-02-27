@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
-from django.contrib.postgres.fields import ArrayField
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
 
 
 # Create your models here.
@@ -8,8 +9,8 @@ class Genre(models.Model):
     id = models.CharField(max_length=16, primary_key=True)
     name = models.CharField(max_length=64)
     cover_image_url = models.ImageField(
-        upload_to="api/static/images/genre_cover_image",
-        default="api/static/images/genre_cover_image/default_image.png",
+        upload_to="images/genre_cover_image",
+        default="images/genre_cover_image/default_image.png",
     )
 
     def __str__(self):
@@ -22,9 +23,9 @@ class Artist(models.Model):
     bio = models.TextField()
     genre = models.ManyToManyField(Genre, related_name="artist_genres")
     profile_image_url = models.ImageField(
-        upload_to="api/static/images/artist_profile_image",
+        upload_to="images/artist_profile_image",
         blank=False,
-        default="api/static/images/artist_profile_image/default_image.png",
+        default="images/artist_profile_image/default_image.png",
     )
     follower_count = models.IntegerField(default=0)
 
@@ -38,14 +39,14 @@ class Song(models.Model):
     artist = models.ManyToManyField(Artist, related_name="songs")
     genre = models.ManyToManyField(Genre, related_name="song_genres")
     file_url = models.FileField(
-        upload_to="api/static/tracks",
+        upload_to="tracks",
         blank=False,
-        default="api/static/tracks/default.mp3",
+        default="tracks/default.mp3",
     )
     cover_image_url = models.ImageField(
-        upload_to="api/static/images/song_cover_image",
+        upload_to="images/song_cover_image",
         blank=False,
-        default="api/static/images/song_cover_image/default_image.png",
+        default="images/song_cover_image/default_image.png",
     )
     release_date = models.DateField()
     play_count = models.IntegerField(default=0)
@@ -61,9 +62,9 @@ class Album(models.Model):
     artist = models.ManyToManyField(Artist, related_name="artists")
     songs = models.ManyToManyField(Song, related_name="songs")
     cover_image_url = models.ImageField(
-        upload_to="api/static/images/album_cover_image",
+        upload_to="images/album_cover_image",
         blank=False,
-        default="api/static/images/album_cover_image/default_image.png",
+        default="images/album_cover_image/default_image.png",
     )
 
     def __str__(self):
@@ -79,9 +80,9 @@ class Playlist(models.Model):
     created_at = models.DateTimeField()
     last_updated = models.DateTimeField()
     cover_image_url = models.ImageField(
-        upload_to="api/static/images/playlist_cover_image",
+        upload_to="images/playlist_cover_image",
         blank=False,
-        default="api/static/images/playlist_cover_image/default_image.png",
+        default="images/playlist_cover_image/default_image.png",
     )
     private = models.BooleanField(default=False)
 

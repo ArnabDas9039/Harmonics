@@ -1,6 +1,5 @@
 from django.urls import path
 from . import views
-from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
 urlpatterns = [
     path("general/", views.CreatedFeedView.as_view(), name="general"),
@@ -44,4 +43,4 @@ urlpatterns = [
     path("room/<room_id>", views.RoomView.as_view(), name="room_get"),
     path("room/<room_id>/update/", views.UpdateRoomView.as_view(), name="room_update"),
     path("room/create/", views.CreateRoomView.as_view(), name="room_create"),
-] + staticfiles_urlpatterns()
+]

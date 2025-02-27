@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib.auth.models import User
 from rest_framework import serializers
 from .models import (
@@ -33,9 +34,16 @@ class GenreShortSerializer(serializers.ModelSerializer):
 
 
 class ArtistShortSerializer(serializers.ModelSerializer):
+    # profile_image_url = serializers.SerializerMethodField()
+
     class Meta:
         model = Artist
         fields = ["id", "name", "profile_image_url"]
+
+    # def get_profile_image_url(self, obj):
+    #     if obj.profile_image_url:
+    #         return f"{settings.MEDIA_FULL_URL}{obj.profile_image_url}"
+    #     return None
 
 
 class SongShortSerializer(serializers.ModelSerializer):
@@ -53,12 +61,18 @@ class GenreSerializer(serializers.ModelSerializer):
 
 
 class ArtistSerializer(serializers.ModelSerializer):
+    # profile_image_url = serializers.SerializerMethodField()
     songs = SongShortSerializer(many=True)
 
     class Meta:
         model = Artist
         fields = "__all__"
         extra_fields = ["songs"]
+
+    # def get_profile_image_url(self, obj):
+    #     if obj.profile_image_url:
+    #         return f"{settings.MEDIA_FULL_URL}{obj.profile_image_url}"
+    #     return None
 
 
 class SongSerializer(serializers.ModelSerializer):

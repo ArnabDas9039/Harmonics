@@ -17,6 +17,7 @@ import {
   Playlist_Info,
 } from "./pages/Info";
 import PlayingWidget from "./components/PlayingWidget";
+// import RoomContext from "./contexts/RoomContext";
 
 function Logout() {
   const { setIsAuthorized, setUser } = useContext(AuthContext);
@@ -32,9 +33,11 @@ function Logout() {
 
 function App() {
   const { isAuthorized, user } = useContext(AuthContext);
+  // const { roomId } = useContext(RoomContext);
 
   return (
     <>
+      {/* {roomId ? <div className="RoomContext">In A Room</div> : <></>} */}
       <Navigation />
       <PlayingWidget />
       <Routes>

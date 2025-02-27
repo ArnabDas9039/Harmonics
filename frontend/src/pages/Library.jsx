@@ -8,7 +8,6 @@ import {
   PlaylistThumbnail,
 } from "../components/Thumbnails";
 import AuthContext from "../contexts/AuthContext";
-// import "../styles/General.css";
 
 function Library() {
   const [feeds, setFeeds] = useState([]);
@@ -30,10 +29,9 @@ function Library() {
         setFeeds(HistoryResponse.data.results);
         setLibrary(LibraryResponse.data[0]);
         setmyPlaylists(PlaylistResponse.data);
+        setIsLoading(false);
       } catch (err) {
         alert(err);
-      } finally {
-        setIsLoading(false);
       }
     };
 

@@ -12,12 +12,15 @@ RUN npm install
 # Copy the rest of the application code
 COPY . .
 
+# Set the environment variable before build
+# ARG VITE_API_URL
+# ENV VITE_API_URL=$VITE_API_URL
+
 # Build the app
 RUN npm run build
 
 # Stage 2: Serve the built app with nginx
-FROM nginx:stable-alpine
-
+FROM nginx:latest
 # Copy the built app from the builder stage
 COPY --from=builder /app/dist /usr/share/nginx/html
 
