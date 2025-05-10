@@ -1,4 +1,5 @@
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect } from "react";
+import { useSelector } from "react-redux";
 import api from "../api";
 import "@material/web/all.js";
 import {
@@ -6,9 +7,9 @@ import {
   ArtistThumbnail,
   MediumThumbnail,
   PlaylistThumbnail,
+  AlbumThumbnail,
 } from "../components/Thumbnails";
 import "../styles/Feed.css";
-import AuthContext from "../contexts/AuthContext";
 import Header from "../components/Header";
 
 function Filter_chip(props) {
@@ -20,11 +21,9 @@ function Filter_chip(props) {
 }
 
 function Home() {
-  const { isAuthorized } = useContext(AuthContext);
+  const isAuthorized = useSelector((state) => state.auth.isAuthorized);
   const [generalFeed, setGeneralFeed] = useState({});
-  const [userFeed, setUserFeed] = useState({});
-  const [topSongs, setTopSongs] = useState([]);
-  const [topArtists, setTopArtists] = useState([]);
+  const [userFeed, setUserFeed] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const chips = [
@@ -43,31 +42,19 @@ function Home() {
 
   useEffect(() => {
     const fetchData = async () => {
-      try {
-        const [generalResponse, songsResponse, artistsResponse] =
-          await Promise.all([
-            api.get("/api/general/"),
-            api.get("/api/songs/top/?limit=10"),
-            api.get("/api/artists/top/?limit=10&seed=" + Math.random()),
-          ]);
-
-        setGeneralFeed(generalResponse.data[0]);
-        setTopSongs(songsResponse.data.results);
-        setTopArtists(artistsResponse.data.results);
-
-        if (isAuthorized) {
-          const UserResponse = await api.get("/api/user/recommendation/");
-
-          setUserFeed(UserResponse.data[0]);
+      if (isAuthorized) {
+        try {
+          const UserResponse = await api.get("/api/feed/");
+          console.log(UserResponse.data);
+          setUserFeed(UserResponse.data);
+          setIsLoading(false);
+        } catch (err) {
+          alert(err);
         }
-        setIsLoading(false);
-      } catch (err) {
-        alert(err);
       }
     };
-
     fetchData();
-  }, []);
+  }, [isAuthorized]);
 
   if (isLoading) {
     return <div>Loading...</div>;
@@ -78,165 +65,34 @@ function Home() {
       <Header destination="Home" />
       <div className="feed">
         <div className="filters">
-          {/* <md-chip-set> */}
           {chips.map((chip, index) => (
-            // <md-filter-chip label={chip} key={index}></md-filter-chip>
             <Filter_chip name={chip} key={index} />
           ))}
-          {/* </md-chip-set> */}
         </div>
-        {isAuthorized && (
+        {userFeed.map((feed) => (
           <>
-            <div className="heading-section">
+            <div className="heading-section" key={feed.group}>
               <div className="heading">
-                <b>Quick Picks</b>
-              </div>
-            </div>
-            {userFeed.quick_picks.length === 0 ? (
-              <div className="empty-text">
-                Listen to more songs to get recommendations
-              </div>
-            ) : (
-              <div className="grid-thumbnails">
-                {userFeed.quick_picks.map((item) => (
-                  <GridThumbnail item={item} key={item.id} />
-                ))}
-              </div>
-            )}
-            <div className="heading-section">
-              <div className="heading">
-                <b>Recommended</b>
-              </div>
-            </div>
-            {userFeed.recommended_songs.length === 0 ? (
-              <div className="empty-text">
-                Listen to more songs to get recommendations
-              </div>
-            ) : (
-              <div className="medium-thumbnails">
-                {userFeed.recommended_songs.map((item) => (
-                  <MediumThumbnail item={item} key={item.id} />
-                ))}
-              </div>
-            )}
-            {/* <div className="heading-section">
-              <div className="heading">
-                <b>Listen Again</b>
-              </div>
-            </div> */}
-            {/* <div className="heading-section">
-              <div className="heading">
-                <b>From your library</b>
-              </div>
-            </div> */}
-            {/* <div className="heading-section">
-              <div className="heading">
-                <b>Mixed for you</b>
+                <b>{feed.group}</b>
               </div>
             </div>
             <div className="medium-thumbnails">
-              {userFeed.mixes.map((item) => (
-                <PlaylistThumbnail item={item} key={item.id} />
+              {feed.items.map((item) => (
+                <div key={item.created_at}>
+                  {item.content_type === "song" && (
+                    <MediumThumbnail item={item.content_object} />
+                  )}
+                  {item.content_type === "album" && (
+                    <AlbumThumbnail item={item.content_object} />
+                  )}
+                  {item.content_type === "artist" && (
+                    <ArtistThumbnail item={item.content_object} />
+                  )}
+                </div>
               ))}
-            </div> */}
-            {/* <div className="heading-section">
-              <div className="heading">
-                <b>SIMILAR TO</b>
-              </div>
-            </div> */}
-            {/* <div className="heading-section">
-              <div className="heading">
-                <b>Forgotten Favourites</b>
-              </div>
-            </div> */}
-            <div className="heading-section">
-              <div className="heading">
-                <b>Latest Releases from your following</b>
-              </div>
             </div>
-            {userFeed.latest_from_following.length === 0 ? (
-              <div className="empty-text">
-                Follow more artists to get their latest releases
-              </div>
-            ) : (
-              <div className="medium-thumbnails">
-                {userFeed.latest_from_following.map((item) => (
-                  <MediumThumbnail item={item} key={item.id} />
-                ))}
-              </div>
-            )}
           </>
-        )}
-        <div className="heading-section">
-          <div className="heading">
-            <b>Top Songs</b>
-          </div>
-        </div>
-        <div className="medium-thumbnails">
-          {topSongs.map((song) => (
-            <MediumThumbnail item={song} key={song.id} />
-          ))}
-        </div>
-        <div className="heading-section">
-          <div className="heading">
-            <b>Top Artists</b>
-          </div>
-        </div>
-        <div className="artist-thumbnails">
-          {topArtists.map((artist) => (
-            <ArtistThumbnail item={artist} key={artist.id} />
-          ))}
-        </div>
-        <div className="heading-section">
-          <div className="heading">
-            <b>PLAYLISTS from the community</b>
-          </div>
-        </div>
-        <div className="medium-thumbnails">
-          {generalFeed.playlists.map((item) => (
-            <PlaylistThumbnail item={item} key={item.id} />
-          ))}
-        </div>
-        <div className="heading-section">
-          <div className="heading">
-            <b>PLAYLISTS for the SEASON</b>
-          </div>
-        </div>
-        <div className="medium-thumbnails">
-          {generalFeed.season_playlist.map((item) => (
-            <PlaylistThumbnail item={item} key={item.id} />
-          ))}
-        </div>
-        <div className="heading-section">
-          <div className="heading">
-            <b>PLAYLISTS for the TIME of the DAY</b>
-          </div>
-        </div>
-        <div className="medium-thumbnails">
-          {generalFeed.day_playlist.map((item) => (
-            <PlaylistThumbnail item={item} key={item.id} />
-          ))}
-        </div>
-        <div className="heading-section">
-          <div className="heading">
-            <b>Events</b>
-          </div>
-        </div>
-        <div className="medium-thumbnails">
-          {generalFeed.event_playlist.map((item) => (
-            <PlaylistThumbnail item={item} key={item.id} />
-          ))}
-        </div>
-        {/* <div className="heading-section">
-          <div className="heading">
-            <b>Genres</b>
-          </div>
-        </div> */}
-        {/* <div className="heading-section">
-          <div className="heading">
-            <b>Hits</b>
-          </div>
-        </div> */}
+        ))}
       </div>
     </div>
   );

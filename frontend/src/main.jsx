@@ -2,20 +2,21 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App.jsx";
 import { BrowserRouter } from "react-router-dom";
-import { AuthProvider } from "./contexts/AuthContext.jsx";
-import { PlayingProvider } from "./contexts/PlayingContext.jsx";
-// import { RoomProvider } from "./contexts/RoomContext.jsx";
+import { Provider } from "react-redux";
+import { persistor, store } from "./store/store";
+import { PersistGate } from "redux-persist/integration/react";
+// import { PlayingProvider } from "./contexts/PlayingContext.jsx";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
-    <BrowserRouter>
-      <PlayingProvider>
-        <AuthProvider>
-          {/* <RoomProvider> */}
+    <Provider store={store}>
+      <PersistGate loading={null} persistor={persistor}>
+        <BrowserRouter>
+          {/* <PlayingProvider> */}
           <App />
-          {/* </RoomProvider> */}
-        </AuthProvider>
-      </PlayingProvider>
-    </BrowserRouter>
+          {/* </PlayingProvider> */}
+        </BrowserRouter>
+      </PersistGate>
+    </Provider>
   </React.StrictMode>
 );

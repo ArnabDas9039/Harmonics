@@ -2,11 +2,10 @@ import { useEffect, useState } from "react";
 import Header from "../components/Header";
 import api from "../api";
 import "../styles/Profile.css";
-import { Link, useParams } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 function Profile() {
-  const [profiles, setProfiles] = useState([]);
-  const { username } = useParams();
+  const [profile, setProfile] = useState([]);
 
   useEffect(() => {
     getProfile();
@@ -14,10 +13,10 @@ function Profile() {
 
   const getProfile = () => {
     api
-      .get("/api/user/" + username)
+      .get("/api/profile/")
       .then((res) => res.data)
       .then((data) => {
-        setProfiles(data);
+        setProfile(data);
         // console.log(data);
       })
       .catch((err) => alert(err));
@@ -26,15 +25,18 @@ function Profile() {
     <div className="body">
       <Header destination="Profile" />
       <div className="info">
-        <div className="thumbnail-section">
-          <div className="large-thumbnail">
+        <div className="profile-section">
+          <div className="profile-thumbnail">
             <img
-              className="large-thumbnail-image"
-              src={profiles.profile_image_url}
+              className="profile-thumbnail-image"
+              src={profile.profile_image_url}
             />
           </div>
         </div>
-        <div className="info-section"></div>
+        <div className="info-section">
+          <div className="username">{profile.username}</div>
+          {/* <div className="user-settings">{profile.user_settings}</div> */}
+        </div>
       </div>
       <div className="Logout-button">
         <Link to="/logout">Logout</Link>

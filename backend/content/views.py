@@ -3,11 +3,10 @@ from rest_framework.views import APIView
 from .serializers import SongSerializer, ArtistSerializer, AlbumSerializer
 from rest_framework.permissions import AllowAny
 from .models import Song, Artist, Album
-from .mypaginations import MyLimitOffsetPagination
 
 
 # Create your views here.
-class ArtistView(generics.ListAPIView):
+class ArtistView(generics.RetrieveAPIView):
     serializer_class = ArtistSerializer
     permission_classes = [AllowAny]
     lookup_field = "public_id"
@@ -52,30 +51,3 @@ class SearchView(APIView):
     #             "albums": album_serializer.data,
     #         }
     #     )
-
-
-class TopSongsListView(generics.ListAPIView):
-    serializer_class = SongSerializer
-    permission_classes = [AllowAny]
-    pagination_class = MyLimitOffsetPagination
-
-    def get_queryset(self):
-        return Song.objects.all().order_by("-play_count")
-
-
-class TopArtistListView(generics.ListAPIView):
-    serializer_class = ArtistSerializer
-    permission_classes = [AllowAny]
-    pagination_class = MyLimitOffsetPagination
-
-    def get_queryset(self):
-        return Artist.objects.all().order_by("-follower_count")
-
-
-class TopAlbumListView(generics.ListAPIView):
-    serializer_class = AlbumSerializer
-    permission_classes = [AllowAny]
-    pagination_class = MyLimitOffsetPagination
-
-    def get_queryset(self):
-        return Album.objects.all()

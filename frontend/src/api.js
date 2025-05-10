@@ -1,23 +1,35 @@
 import axios from "axios";
-import { ACCESS_TOKEN } from "./constants";
-
-// const apiURL = "/choreo-apis/harmonics/backend/v1";
 
 const api = axios.create({
-  // baseURL: import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL : apiURL,
-  baseURL: import.meta.env.VITE_API_URL,
+  baseURL: "http://localhost:8000",
+  withCredentials: true,
 });
-// console.log(import.meta.env.VITE_API_URL);
 
 api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem(ACCESS_TOKEN);
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
+  async (config) => {
     return config;
   },
   (error) => {
+    return Promise.reject(error);
+  }
+);
+
+api.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const originalRequest = error.config;
+
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
+      try {
+        await api.post("/auth/refresh/");
+        return api(originalRequest);
+      } catch (err) {
+        store.dispatch(logoutUser());
+        window.location.href = "/login";
+        return Promise.reject(err);
+      }
+    }
     return Promise.reject(error);
   }
 );

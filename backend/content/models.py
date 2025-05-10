@@ -41,7 +41,6 @@ class Artist(models.Model):
         blank=False,
         default="images/artist_profile_image/default_image.png",
     )
-    follower_count = models.PositiveIntegerField(default=0)
 
     def __str__(self):
         return f"{self.public_id}"
@@ -71,9 +70,6 @@ class Song(models.Model):
         default="images/song_thumbnail/default_image.png",
     )
     release_date = models.DateField()
-    play_count = models.PositiveIntegerField(default=0)
-    like_count = models.PositiveIntegerField(default=0)
-    dislike_count = models.PositiveIntegerField(default=0)
     duration = models.DurationField()
     is_explicit = models.BooleanField(default=False)
     version = models.ForeignKey(Version, on_delete=models.CASCADE)
@@ -93,28 +89,28 @@ class Song(models.Model):
 
 class Song_Version(models.Model):
     id = models.BigAutoField(primary_key=True)
-    song_id = models.ForeignKey(Song, on_delete=models.CASCADE, related_name="song")
-    refer_song_id = models.ForeignKey(
+    song = models.ForeignKey(Song, on_delete=models.CASCADE, related_name="song")
+    refer_song = models.ForeignKey(
         Song, on_delete=models.CASCADE, related_name="refer_song"
     )
 
 
 class Artist_Genre(models.Model):
     id = models.BigAutoField(primary_key=True)
-    artist_id = models.ForeignKey(Artist, on_delete=models.CASCADE)
-    genre_id = models.ForeignKey(Genre, on_delete=models.CASCADE)
+    artist = models.ForeignKey(Artist, on_delete=models.CASCADE)
+    genre = models.ForeignKey(Genre, on_delete=models.CASCADE)
 
 
 class Genre_Song(models.Model):
     id = models.BigAutoField(primary_key=True)
-    song_id = models.ForeignKey(Song, on_delete=models.CASCADE)
-    genre_id = models.ForeignKey(Genre, on_delete=models.CASCADE)
+    song = models.ForeignKey(Song, on_delete=models.CASCADE)
+    genre = models.ForeignKey(Genre, on_delete=models.CASCADE)
 
 
 class Artist_Song(models.Model):
     id = models.BigAutoField(primary_key=True)
-    song_id = models.ForeignKey(Song, on_delete=models.CASCADE)
-    artist_id = models.ForeignKey(Artist, on_delete=models.CASCADE)
+    song = models.ForeignKey(Song, on_delete=models.CASCADE)
+    artist = models.ForeignKey(Artist, on_delete=models.CASCADE)
     role = models.CharField(max_length=255)
 
 
@@ -130,11 +126,8 @@ class Album(models.Model):
     release_date = models.DateField()
     release_type = models.CharField(
         max_length=10,
-        choices=[("single", "Single"), ("album", "Album"), ("ep", "EP")],
+        choices=[("Single", "Single"), ("Album", "Album"), ("EP", "EP")],
     )
-    play_count = models.PositiveIntegerField(default=0)
-    like_count = models.PositiveIntegerField(default=0)
-    dislike_count = models.PositiveIntegerField(default=0)
     duration = models.DurationField()
     is_explicit = models.BooleanField(default=False)
 
@@ -153,13 +146,13 @@ class Album(models.Model):
 
 class Album_Song(models.Model):
     id = models.BigAutoField(primary_key=True)
-    song_id = models.ForeignKey(Song, on_delete=models.CASCADE)
-    album_id = models.ForeignKey(Album, on_delete=models.CASCADE)
+    song = models.ForeignKey(Song, on_delete=models.CASCADE)
+    album = models.ForeignKey(Album, on_delete=models.CASCADE)
     order = models.PositiveIntegerField()
 
 
 class Album_Artist(models.Model):
     id = models.BigAutoField(primary_key=True)
-    artist_id = models.ForeignKey(Artist, on_delete=models.CASCADE)
-    album_id = models.ForeignKey(Album, on_delete=models.CASCADE)
+    artist = models.ForeignKey(Artist, on_delete=models.CASCADE)
+    album = models.ForeignKey(Album, on_delete=models.CASCADE)
     role = models.CharField(max_length=255)

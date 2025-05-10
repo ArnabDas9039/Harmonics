@@ -1,5 +1,6 @@
 import Header from "../components/Header";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 import api from "../api";
 import {
   AlbumThumbnail,
@@ -7,28 +8,24 @@ import {
   MediumThumbnail,
   PlaylistThumbnail,
 } from "../components/Thumbnails";
-import AuthContext from "../contexts/AuthContext";
 
 function Library() {
   const [feeds, setFeeds] = useState([]);
   const [library, setLibrary] = useState([]);
   const [myPlaylists, setmyPlaylists] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const { isAuthorized } = useContext(AuthContext);
+  const isAuthorized = useSelector((state) => state.auth.isAuthorized);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [HistoryResponse, LibraryResponse, PlaylistResponse] =
-          await Promise.all([
-            api.get("/api/history/get/?limit=10"),
-            api.get("/api/library/"),
-            api.get("/api/library/playlists/"),
-          ]);
-
+        const [HistoryResponse, LibraryResponse] = await Promise.all([
+          api.get("/api/history/?limit=10"),
+          api.get("/api/library/"),
+        ]);
         setFeeds(HistoryResponse.data.results);
-        setLibrary(LibraryResponse.data[0]);
-        setmyPlaylists(PlaylistResponse.data);
+        setLibrary(LibraryResponse.data.results);
+        // setmyPlaylists(PlaylistResponse.data);
         setIsLoading(false);
       } catch (err) {
         alert(err);
@@ -38,7 +35,7 @@ function Library() {
     if (isAuthorized) {
       fetchData();
     }
-  }, []);
+  }, [isAuthorized]);
 
   if (isLoading) {
     return <div>Loading...</div>;
@@ -55,7 +52,7 @@ function Library() {
         </div>
         <div className="medium-thumbnails">
           {feeds.map((song) => (
-            <MediumThumbnail item={song.song} key={song.id} />
+            <MediumThumbnail item={song.content_object} key={song.created_at} />
           ))}
         </div>
       </>
@@ -66,9 +63,9 @@ function Library() {
           </div>
         </div>
         <div className="medium-thumbnails">
-          {myPlaylists.map((song) => (
+          {/* {myPlaylists.map((song) => (
             <PlaylistThumbnail item={song} key={song.id} />
-          ))}
+          ))} */}
         </div>
       </>
       <>
@@ -78,9 +75,9 @@ function Library() {
           </div>
         </div>
         <div className="medium-thumbnails">
-          {library.liked_songs.map((song) => (
+          {/* {library.liked_songs.map((song) => (
             <MediumThumbnail item={song} key={song.id} />
-          ))}
+          ))} */}
         </div>
       </>
       <>
@@ -90,9 +87,9 @@ function Library() {
           </div>
         </div>
         <div className="medium-thumbnails">
-          {library.followed_artists.map((song) => (
+          {/* {library.followed_artists.map((song) => (
             <ArtistThumbnail item={song} key={song.id} />
-          ))}
+          ))} */}
         </div>
       </>
       <>
@@ -102,9 +99,9 @@ function Library() {
           </div>
         </div>
         <div className="medium-thumbnails">
-          {library.liked_albums.map((song) => (
+          {/* {library.liked_albums.map((song) => (
             <AlbumThumbnail item={song} key={song.id} />
-          ))}
+          ))} */}
         </div>
       </>
       <>
@@ -114,9 +111,9 @@ function Library() {
           </div>
         </div>
         <div className="medium-thumbnails">
-          {library.saved_playlists.map((song) => (
+          {/* {library.saved_playlists.map((song) => (
             <PlaylistThumbnail item={song} key={song.id} />
-          ))}
+          ))} */}
         </div>
       </>
     </div>

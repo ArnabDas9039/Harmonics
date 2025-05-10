@@ -2,10 +2,21 @@ import { useContext, useEffect, useState } from "react";
 import Header from "../components/Header";
 import { useParams } from "react-router-dom";
 import api from "../api";
-import PlayingContext from "../contexts/PlayingContext";
+// import PlayingContext from "../contexts/PlayingContext";
 import { Link } from "react-router-dom";
 import "../styles/Info.css";
-import { GridThumbnail } from "../components/Thumbnails";
+import { useDispatch, useSelector } from "react-redux";
+import { setIsPlaying, setPlaying, setQueue } from "../store/playSlice";
+import { AlbumThumbnail, GridThumbnail } from "../components/Thumbnails";
+import {
+  IconSVG,
+  PlayIcon,
+  PauseIcon,
+  LikeIcon,
+  FilledLikeIcon,
+  AddToPlaylistIcon,
+  QueueIcon,
+} from "../assets/Icons";
 
 const ReadMore = ({ text, limit = 100 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -37,9 +48,11 @@ export function Song_Info() {
   const [item, setItem] = useState({});
   const [artists, setArtists] = useState([]);
   const [genres, setGenres] = useState([]);
-  const { playing, setPlaying, isPlaying, setIsPlaying } =
-    useContext(PlayingContext);
-
+  const [albums, setAlbums] = useState([]);
+  // const { playing, setPlaying, isPlaying, setIsPlaying } =
+  //   useContext(PlayingContext);
+  const { isPlaying, playing } = useSelector((state) => state.play);
+  const dispatch = useDispatch();
   useEffect(() => {
     getItem();
   }, []);
@@ -50,23 +63,31 @@ export function Song_Info() {
       .then((res) => res.data)
       .then((data) => {
         setItem(data);
-        setArtists(data.artist);
-        setGenres(data.genre);
+        setArtists(data.artists);
+        setGenres(data.genres);
+        setAlbums(data.albums);
         // console.log(data);
       })
       .catch((err) => alert(err));
   };
 
   const handlePlayButton = () => {
-    if (playing.id != item.id && isPlaying) {
-      setPlaying(item);
-      setIsPlaying(true);
+    if (
+      playing?.source_id != item.public_id ||
+      playing?.public_id != item.public_id
+    ) {
+      let song = { ...item };
+      song.source_id = song.public_id;
+      song.source_type = "song";
+      dispatch(setPlaying(song));
+      dispatch(setIsPlaying(true));
+      dispatch(setQueue([]));
     } else {
-      setPlaying(item);
+      // dispatch(setPlaying(item));
       // console.log(playing);
-      setIsPlaying(!isPlaying);
+      dispatch(setIsPlaying(!isPlaying));
     }
-    console.log(item.file_url);
+    // console.log(item.file_url);
   };
 
   return (
@@ -75,11 +96,22 @@ export function Song_Info() {
       <div className="info">
         <div className="thumbnail-section">
           <div className="large-thumbnail">
-            <img src={item.cover_image_url} className="large-thumbnail-image" />
+            <img src={item.thumbnail_url} className="large-thumbnail-image" />
           </div>
         </div>
         <div className="info-section">
           <div className="song-name">{item.title}</div>
+          <div className="title-desc">{item.version}</div>
+          <div className="title-desc">{item.release_date}</div>
+          <div className="title-desc">{item.duration}</div>
+          {item.analytics && (
+            <div className="title-desc">{item.analytics.play_count} plays</div>
+          )}
+          {albums.map((album) => (
+            <div className="album-item" key={album.public_id}>
+              <Link to={"/album/" + album.public_id}>{album.title}</Link>
+            </div>
+          ))}
           <div className="options">
             <div className="button">
               <div className="controls">
@@ -87,51 +119,37 @@ export function Song_Info() {
                   className="controls-button play-pause"
                   onClick={handlePlayButton}
                 >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    height="28px"
-                    viewBox="0 -960 960 960"
-                    width="28px"
-                    fill="var(--md-sys-color-on-background)"
-                  >
-                    {isPlaying ? (
-                      <path d="M560-240v-480h140v480H560Zm-300 0v-480h140v480H260Z" />
-                    ) : (
-                      <path d="M360-272.31v-415.38L686.15-480 360-272.31Z" />
-                    )}
-                  </svg>
+                  <IconSVG>
+                    {isPlaying &&
+                    playing.public_id === item.public_id &&
+                    playing.source_id === item.public_id
+                      ? PauseIcon
+                      : PlayIcon}
+                  </IconSVG>
                 </button>
               </div>
             </div>
             <div className="button">
               <button className="controls-button">
-                <img
-                  src="http://127.0.0.1:8000/api/static/icons/Playlist_add.svg"
-                  alt=""
-                  className="controls-button-icon"
-                />
+                <IconSVG>{AddToPlaylistIcon}</IconSVG>
               </button>
             </div>
             <div className="button">
               <button className="controls-button">
-                <img
-                  src="http://127.0.0.1:8000/api/static/icons/Like.svg"
-                  alt=""
-                  className="controls-button-icon"
-                />
+                <IconSVG>{LikeIcon}</IconSVG>
               </button>
             </div>
           </div>
           <div className="genre-filters">
             {genres.map((chip) => (
-              <div className="chips" key={chip.id}>
-                <button className="chips-button">{chip.name}</button>
+              <div className="chips" key={chip}>
+                <button className="chips-button">{chip}</button>
               </div>
             ))}
           </div>
           <div className="artist-list">
             {artists.map((person) => (
-              <div className="artist-item" key={person.id}>
+              <div className="artist-item" key={person.public_id}>
                 <div className="artist-item-thumbnail">
                   <img
                     src={person.profile_image_url}
@@ -140,8 +158,9 @@ export function Song_Info() {
                   />
                 </div>
                 <div className="artist-item-name">
-                  <Link to={"/artist/" + person.id}>{person.name}</Link>
+                  <Link to={"/artist/" + person.public_id}>{person.name}</Link>
                 </div>
+                <div className="role">{person.role}</div>
               </div>
             ))}
           </div>
@@ -154,7 +173,7 @@ export function Song_Info() {
       </div>
       <div className="grid-thumbnails">
         {/* {userFeed.quick_picks.map((item) => ( */}
-        {/* <GridThumbnail item={item} key={item.id} /> */}
+        {/* <GridThumbnail item={item} key={item.public_id} /> */}
         {/* ))} */}
       </div>
       <div className="heading-section">
@@ -164,7 +183,7 @@ export function Song_Info() {
       </div>
       <div className="medium-thumbnails">
         {/* {userFeed.quick_picks.map((item) => ( */}
-        {/* <GridThumbnail item={item} key={item.id} /> */}
+        {/* <GridThumbnail item={item} key={item.public_id} /> */}
         {/* ))} */}
       </div>
     </div>
@@ -175,9 +194,11 @@ export function Artist_Info() {
   const { artist_id } = useParams();
   const [item, setItem] = useState({});
   const [songs, setSongs] = useState([]);
+  const [albums, setAlbums] = useState([]);
   const [isExpanded, setIsExpanded] = useState(false);
-  const { playing, setPlaying, isPlaying, setIsPlaying } =
-    useContext(PlayingContext);
+  // const { playing, setPlaying, isPlaying, setIsPlaying } =
+  //   useContext(PlayingContext);
+  const { isPlaying, playing } = useSelector((state) => state.play);
 
   useEffect(() => {
     getItem();
@@ -191,7 +212,7 @@ export function Artist_Info() {
   };
 
   const handlePlayButton = () => {
-    if (playing.id === item.id) {
+    if (playing.public_id === item.public_id) {
       setIsPlaying(!isPlaying);
     } else {
       setPlaying(item);
@@ -205,9 +226,10 @@ export function Artist_Info() {
       .get(`/api/artist/${artist_id}`)
       .then((res) => res.data)
       .then((data) => {
+        console.log(data);
         setItem(data);
         setSongs(data.songs);
-        // console.log(data);
+        setAlbums(data.albums);
       })
       .catch((err) => alert(err));
   };
@@ -215,7 +237,7 @@ export function Artist_Info() {
   const handlefollow = async () => {
     try {
       const response = await api.put("/api/library/post/artist/", {
-        artist_id: item.id,
+        artist_id: item.public_id,
       });
       console.log(response.data);
     } catch (err) {
@@ -236,12 +258,20 @@ export function Artist_Info() {
         </div>
         <div className="artist-info-section">
           <div className="artist-name">{item.name}</div>
+          {item.analytics && (
+            <div className="artist-title">
+              {item.analytics.follower_count} Followers
+            </div>
+          )}
           {item.bio && (
             <div className="artist-bio">
               {isExpanded ? item.bio : `${item.bio.slice(0, 50)}...`}
               <button
                 onClick={toggleReadMore}
-                style={{ marginLeft: "5px", cursor: "pointer" }}
+                style={{
+                  marginLeft: "5px",
+                  cursor: "pointer",
+                }}
               >
                 {isExpanded ? "Show Less" : "Read More"}
               </button>
@@ -251,19 +281,7 @@ export function Artist_Info() {
             <div className="button">
               <div className="controls">
                 <button className="controls-button play-pause">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    height="28px"
-                    viewBox="0 -960 960 960"
-                    width="28px"
-                    fill="var(--md-sys-color-on-background)"
-                  >
-                    {isPlaying ? (
-                      <path d="M560-240v-480h140v480H560Zm-300 0v-480h140v480H260Z" />
-                    ) : (
-                      <path d="M360-272.31v-415.38L686.15-480 360-272.31Z" />
-                    )}
-                  </svg>
+                  <IconSVG>{isPlaying ? PauseIcon : PlayIcon}</IconSVG>
                 </button>
               </div>
             </div>
@@ -272,19 +290,73 @@ export function Artist_Info() {
                 Follow
               </button>
             </div>
-            {/* <div className="button">
-              <button className="controls-button">
-                <img
-                  src="http://127.0.0.1:8000/api/static/icons/Playlist_add.svg"
-                  alt=""
-                  className="controls-button-icon"
-                />
-              </button>
-            </div> */}
+          </div>
+          <div className="heading-section">
+            <div className="heading">
+              <b>Songs</b>
+            </div>
           </div>
           <div className="grid-thumbnails">
             {songs.map((song) => (
-              <GridThumbnail item={song} key={song.id} />
+              <div className="song-item" key={song.public_id}>
+                <div className="order">{song.order}</div>
+                <div className="song-item-thumbnail-section">
+                  <div className="song-item-thumbnail">
+                    <img
+                      src={song.thumbnail_url}
+                      alt=""
+                      className="song-item-image"
+                    />
+                  </div>
+                  <div
+                    className="overlay"
+                    onClick={() => {
+                      if (playing.public_id === song.id) {
+                        setIsPlaying(!isPlaying);
+                      } else {
+                        setPlaying(song);
+                        setIsPlaying(true);
+                      }
+                      console.log(song.file_url);
+                    }}
+                  >
+                    <button className="controls-button play-pause">
+                      <IconSVG>{isPlaying ? PauseIcon : PlayIcon}</IconSVG>
+                    </button>
+                  </div>
+                </div>
+                <div className="title-section">
+                  <div className="title">
+                    <Link to={"/song/" + song.public_id}>{song.title}</Link>
+                  </div>
+                  {song.analytics && (
+                    <div className="title-info">
+                      {song.analytics.play_count} plays
+                    </div>
+                  )}
+                  <div className="title-info">
+                    {song.artists.map((person) => (
+                      <Link
+                        to={"/artist/" + person.public_id}
+                        key={person.public_id}
+                      >
+                        {person.name + " "}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+                <div className="duration">{song.duration}</div>
+              </div>
+            ))}
+          </div>
+          <div className="heading-section">
+            <div className="heading">
+              <b>Albums</b>
+            </div>
+          </div>
+          <div className="medium-thumbnails">
+            {albums.map((album) => (
+              <AlbumThumbnail item={album} key={album.public_id} />
             ))}
           </div>
         </div>
@@ -296,21 +368,32 @@ export function Album_Info() {
   const { album_id } = useParams();
   const [item, setItem] = useState({});
   const [songs, setSongs] = useState([]);
-  const { playing, setPlaying, isPlaying, setIsPlaying } =
-    useContext(PlayingContext);
+  const [artists, setArtists] = useState([]);
+  // const { playing, setPlaying, isPlaying, setIsPlaying } =
+  //   useContext(PlayingContext);
+  const { isPlaying, playing } = useSelector((state) => state.play);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     getItem();
   }, []);
 
   const handlePlayButton = () => {
-    if (playing.id === item.id) {
-      setIsPlaying(!isPlaying);
+    if (playing.source_id != item.public_id) {
+      const qsongs =
+        item.songs?.map((song) => ({
+          ...song,
+          source_id: item.public_id,
+          source_type: "album",
+        })) || [];
+      // console.log(qsongs);
+      dispatch(setPlaying(qsongs[0]));
+      dispatch(setIsPlaying(true));
+      dispatch(setQueue(qsongs));
     } else {
-      setPlaying(item);
-      setIsPlaying(true);
+      dispatch(setIsPlaying(!isPlaying));
     }
-    console.log(item.file_url);
+    // console.log(item.file_url);
   };
 
   const getItem = () => {
@@ -320,7 +403,8 @@ export function Album_Info() {
       .then((data) => {
         setItem(data);
         setSongs(data.songs);
-        // console.log(data);
+        setArtists(data.artists);
+        console.log(data);
       })
       .catch((err) => alert(err));
   };
@@ -328,8 +412,36 @@ export function Album_Info() {
     <div className="body">
       <Header destination="Album Info" />
       <div className="info">
+        <div className="thumbnail-section">
+          <div className="large-thumbnail">
+            <img src={item.thumbnail_url} className="large-thumbnail-image" />
+          </div>
+          {artists.map((person) => (
+            <div className="artist-item" key={person.public_id}>
+              <div className="artist-item-thumbnail">
+                <img
+                  src={person.profile_image_url}
+                  alt=""
+                  className="artist-item-image"
+                />
+              </div>
+              <div className="artist-item-name">
+                <Link to={"/artist/" + person.public_id}>{person.name}</Link>
+              </div>
+              <div className="role">{person.role}</div>
+            </div>
+          ))}
+        </div>
         <div className="info-section">
           <div className="song-name">{item.title}</div>
+          <div className="title-desc">{item.release_type}</div>
+          <div className="title-desc">{item.is_explicit ? "E" : ""}</div>
+          <div className="title-desc">{item.release_date}</div>
+          <div className="title-desc">
+            {songs.length}
+            {songs.length === 1 ? " song" : " songs"}
+          </div>
+          <div className="title-desc">{item.duration}</div>
           <div className="options">
             <div className="button">
               <div className="controls">
@@ -337,44 +449,33 @@ export function Album_Info() {
                   className="controls-button play-pause"
                   onClick={handlePlayButton}
                 >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    height="28px"
-                    viewBox="0 -960 960 960"
-                    width="28px"
-                    fill="var(--md-sys-color-on-background)"
-                  >
-                    <path d="M360-272.31v-415.38L686.15-480 360-272.31Z" />
-                  </svg>
+                  <IconSVG>
+                    {isPlaying && playing.source_id === item.public_id
+                      ? PauseIcon
+                      : PlayIcon}
+                  </IconSVG>
                 </button>
               </div>
             </div>
             <div className="button">
               <button className="controls-button">
-                <img
-                  src="http://127.0.0.1:8000/api/static/icons/Playlist_add.svg"
-                  alt=""
-                  className="controls-button-icon"
-                />
+                <IconSVG>{AddToPlaylistIcon}</IconSVG>
               </button>
             </div>
             <div className="button">
               <button className="controls-button">
-                <img
-                  src="http://127.0.0.1:8000/api/static/icons/Like.svg"
-                  alt=""
-                  className="controls-button-icon"
-                />
+                <IconSVG>{LikeIcon}</IconSVG>
               </button>
             </div>
           </div>
           <div className="song-list">
             {songs.map((song) => (
-              <div className="song-item" key={song.id}>
+              <div className="song-item" key={song.public_id}>
+                <div className="order">{song.order}</div>
                 <div className="song-item-thumbnail-section">
                   <div className="song-item-thumbnail">
                     <img
-                      src={song.cover_image_url}
+                      src={song.thumbnail_url}
                       alt=""
                       className="song-item-image"
                     />
@@ -382,42 +483,65 @@ export function Album_Info() {
                   <div
                     className="overlay"
                     onClick={() => {
-                      if (playing.id === song.id) {
-                        setIsPlaying(!isPlaying);
+                      if (
+                        playing.public_id != song.public_id ||
+                        playing.source_id != item.public_id
+                      ) {
+                        const qsongs =
+                          item.songs?.map((song) => ({
+                            ...song,
+                            source_id: item.public_id,
+                            source_type: "album",
+                          })) || [];
+                        const currentIndex = qsongs.findIndex(
+                          (item) => item.public_id === song.public_id
+                        );
+                        console.log(currentIndex);
+                        if (currentIndex != 0 && currentIndex < qsongs.length) {
+                          dispatch(setPlaying(qsongs[currentIndex]));
+                          dispatch(setIsPlaying(true));
+                        } else {
+                          dispatch(setPlaying(qsongs[0]));
+                          dispatch(setIsPlaying(true));
+                        }
+                        dispatch(setQueue(qsongs));
                       } else {
-                        setPlaying(song);
-                        setIsPlaying(true);
+                        dispatch(setIsPlaying(!isPlaying));
                       }
-                      console.log(song.file_url);
                     }}
                   >
                     <button className="controls-button play-pause">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        height="28px"
-                        viewBox="0 -960 960 960"
-                        width="28px"
-                        fill="var(--md-sys-color-on-background)"
-                      >
-                        {isPlaying ? (
-                          <path d="M560-240v-480h140v480H560Zm-300 0v-480h140v480H260Z" />
-                        ) : (
-                          <path d="M360-272.31v-415.38L686.15-480 360-272.31Z" />
-                        )}
-                      </svg>
+                      <IconSVG>
+                        {isPlaying &&
+                        playing.source_id === item.public_id &&
+                        playing.public_id === song.public_id
+                          ? PauseIcon
+                          : PlayIcon}
+                      </IconSVG>
                     </button>
                   </div>
                 </div>
-                <div className="song-item-name">
-                  <Link to={"/info/" + song.id}>{song.title}</Link>
+                <div className="title-section">
+                  <div className="title">
+                    <Link to={"/song/" + song.public_id}>{song.title}</Link>
+                  </div>
+                  <div className="title-info">
+                    {song.analytics.play_count} plays
+                  </div>
+                  <div className="title-info">
+                    {item.artists.map((person) => (
+                      <Link
+                        to={"/artist/" + person.public_id}
+                        key={person.public_id}
+                      >
+                        {person.name + " "}
+                      </Link>
+                    ))}
+                  </div>
                 </div>
+                <div className="duration">{song.duration}</div>
               </div>
             ))}
-          </div>
-        </div>
-        <div className="thumbnail-section">
-          <div className="large-thumbnail">
-            <img src={item.cover_image_url} className="large-thumbnail-image" />
           </div>
         </div>
       </div>
@@ -429,8 +553,9 @@ export function Playlist_Info() {
   const { playlist_id } = useParams();
   const [item, setItem] = useState({});
   const [songs, setSongs] = useState([]);
-  const { playing, setPlaying, isPlaying, setIsPlaying, queue, setQueue } =
-    useContext(PlayingContext);
+  // const { playing, setPlaying, isPlaying, setIsPlaying, queue, setQueue } =
+  //   useContext(PlayingContext);
+  const { isPlaying, playing } = useSelector((state) => state.play);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -439,7 +564,7 @@ export function Playlist_Info() {
 
   const handlePlayButton = async () => {
     try {
-      const response = await api.get(`api/playlist/${item.id}`);
+      const response = await api.get(`api/playlist/${item.public_id}`);
       setQueue(response.data.songs);
       setPlaying(response.data.songs[0]);
       setIsPlaying(true);
@@ -475,20 +600,20 @@ export function Playlist_Info() {
                   className="controls-button play-pause"
                   onClick={handlePlayButton}
                 >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    height="28px"
-                    viewBox="0 -960 960 960"
-                    width="28px"
-                    fill="var(--md-sys-color-on-background)"
-                  >
-                    <path d="M360-272.31v-415.38L686.15-480 360-272.31Z" />
-                  </svg>
+                  <IconSVG>{PlayIcon}</IconSVG>
                 </button>
               </div>
             </div>
-            <div className="button">add to playlist</div>
-            <div className="button">add to queue</div>
+            <div className="button">
+              <button className="controls-button">
+                <IconSVG>{AddToPlaylistIcon}</IconSVG>
+              </button>
+            </div>
+            <div className="button">
+              <button className="controls-button">
+                <IconSVG>{QueueIcon}</IconSVG>
+              </button>
+            </div>
           </div>
           <div className="song-list">
             {songs.map((song) => (
@@ -504,7 +629,7 @@ export function Playlist_Info() {
                   <div
                     className="overlay"
                     onClick={() => {
-                      if (playing.id === song.id) {
+                      if (playing.public_id === song.id) {
                         setIsPlaying(!isPlaying);
                       } else {
                         setPlaying(song);
@@ -514,19 +639,7 @@ export function Playlist_Info() {
                     }}
                   >
                     <button className="controls-button play-pause">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        height="28px"
-                        viewBox="0 -960 960 960"
-                        width="28px"
-                        fill="var(--md-sys-color-on-background)"
-                      >
-                        {isPlaying ? (
-                          <path d="M560-240v-480h140v480H560Zm-300 0v-480h140v480H260Z" />
-                        ) : (
-                          <path d="M360-272.31v-415.38L686.15-480 360-272.31Z" />
-                        )}
-                      </svg>
+                      <IconSVG>{isPlaying ? PauseIcon : PlayIcon}</IconSVG>
                     </button>
                   </div>
                 </div>

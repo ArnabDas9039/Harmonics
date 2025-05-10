@@ -1,58 +1,51 @@
-import { useContext, useState } from "react";
-import api from "../api";
-import { ACCESS_TOKEN, REFRESH_TOKEN, USERNAME } from "../constants";
+import { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { loginUser } from "../store/authSlice";
+import { useNavigate } from "react-router-dom";
 import "../styles/Form.css";
-import AuthContext from "../contexts/AuthContext";
 
 function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const { isAuthorized, setIsAuthorized, user, setUser } =
-    useContext(AuthContext);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { error, loading } = useSelector((state) => state.auth);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     try {
-      const response = await api.post("/api/token/", { username, password });
-
-      localStorage.setItem(ACCESS_TOKEN, response.data.access);
-      localStorage.setItem(REFRESH_TOKEN, response.data.refresh);
-      localStorage.setItem(USERNAME, username);
-      setIsAuthorized(true);
-      setUser(username);
-
-      history.back();
-    } catch (error) {
-      alert("Invalid username or password");
+      await dispatch(loginUser({ username, password })).unwrap();
+      navigate(-1);
+    } catch (err) {
+      // Error is handled by Redux
+      console.error("Login failed:", err);
     }
   };
 
   return (
-    <>
-      <form onSubmit={handleSubmit} className="form-container">
-        <h1>Login</h1>
-        <input
-          type="text"
-          className="form-input"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          placeholder="Username"
-          required
-        />
-        <input
-          type="password"
-          className="form-input"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          placeholder="Password"
-          required
-        />
-        <button className="form-button" type="submit">
-          Login
-        </button>
-      </form>
-    </>
+    <form onSubmit={handleSubmit} className="form-container">
+      <h1>Login</h1>
+      {error && <div className="error-message">{error}</div>}
+      <input
+        type="text"
+        className="form-input"
+        value={username}
+        onChange={(e) => setUsername(e.target.value)}
+        placeholder="Username"
+        required
+      />
+      <input
+        type="password"
+        className="form-input"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        placeholder="Password"
+        required
+      />
+      <button className="form-button" type="submit" disabled={loading}>
+        {loading ? "Logging in..." : "Login"}
+      </button>
+    </form>
   );
 }
 

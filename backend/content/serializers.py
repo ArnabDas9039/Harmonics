@@ -5,39 +5,38 @@ from .models import (
     Artist,
     Song,
     Album,
+    Genre_Song,
     Artist_Song,
+    Album_Artist,
     Album_Song,
+    Version,
 )
 
 
 class GenreSerializer(serializers.ModelSerializer):
     class Meta:
         model = Genre
-        fields = ["id", "name", "cover_image_url"]
+        fields = ["name", "cover_image_url"]
 
 
 class SongSerializer(serializers.ModelSerializer):
-    # genre = GenreSerializer(many=True)
+    genres = serializers.SerializerMethodField()
+    version = serializers.SerializerMethodField()
     artists = serializers.SerializerMethodField()
     albums = serializers.SerializerMethodField()
 
     class Meta:
         model = Song
-        # fields = "__all__"
-        # extra_fields = ["artists", "albums"]
         fields = [
             "public_id",
             "title",
             "file_url",
             "thumbnail_url",
             "release_date",
-            "play_count",
-            "like_count",
-            "dislike_count",
             "duration",
             "is_explicit",
             "version",
-            # "genre",
+            "genres",
             "artists",
             "albums",
         ]
@@ -52,29 +51,42 @@ class SongSerializer(serializers.ModelSerializer):
             return f"{settings.MEDIA_FULL_URL}{obj.thumbnail_url}"
         return None
 
+    def get_genres(self, obj):
+        genres = Genre_Song.objects.filter(song_id=obj.id)
+        if genres is not None:
+            return [genre.genre.name for genre in genres]
+        return None
+
+    def get_version(self, obj):
+        version = Version.objects.get(id=obj.version_id)
+        if version is not None:
+            return version.name
+        return None
+
     def get_artists(self, obj):
-        artists = Artist_Song.objects.filter(song_id=obj.id)
+        artists = Artist_Song.objects.filter(song=obj.id)
         if artists is not None:
             return [
                 {
-                    "public_id": artist.artist_id.public_id,
-                    "name": artist.artist_id.name,
-                    "profile_image_url": f"{settings.MEDIA_FULL_URL}{artist.artist_id.profile_image_url}",
-                    "follower_count": artist.artist_id.follower_count,
+                    "public_id": artist.artist.public_id,
+                    "name": artist.artist.name,
+                    "role": artist.role,
+                    "profile_image_url": f"{settings.MEDIA_FULL_URL}{artist.artist.profile_image_url}",
                 }
                 for artist in artists
             ]
         return None
 
     def get_albums(self, obj):
-        albums = Album_Song.objects.filter(song_id=obj.id)
+        albums = Album_Song.objects.filter(song=obj.id)
         if albums is not None:
             return [
                 {
-                    "public_id": album.album_id.public_id,
-                    "title": album.album_id.title,
-                    "cover_image_url": f"{settings.MEDIA_FULL_URL}{album.album_id.cover_image_url}",
-                    "release_date": album.album_id.release_date,
+                    "public_id": album.album.public_id,
+                    "title": album.album.title,
+                    "thumbnail_url": f"{settings.MEDIA_FULL_URL}{album.album.thumbnail_url}",
+                    "release_date": album.album.release_date,
+                    "is_explicit": album.album.is_explicit,
                 }
                 for album in albums
             ]
@@ -82,18 +94,17 @@ class SongSerializer(serializers.ModelSerializer):
 
 
 class AlbumSerializer(serializers.ModelSerializer):
-    songs = SongSerializer(many=True)
+    songs = serializers.SerializerMethodField()
+    artists = serializers.SerializerMethodField()
 
     class Meta:
         model = Album
         fields = [
             "public_id",
             "title",
-            "thumbnail_urlrelease_date",
+            "thumbnail_url",
+            "release_date",
             "release_type",
-            "play_count",
-            "like_count",
-            "dislike_count",
             "duration",
             "is_explicit",
             "artists",
@@ -106,25 +117,53 @@ class AlbumSerializer(serializers.ModelSerializer):
         return None
 
     def get_artists(self, obj):
-        artists = obj.album_artist.filter(album_id=obj.id)
+        artists = Album_Artist.objects.filter(album=obj.id)
         if artists is not None:
             return [
                 {
-                    "public_id": artists.artist_id.public_id,
-                    "name": artist.artist_id.name,
-                    "profile_image_url": f"{settings.MEDIA_FULL_URL}{artist.artist_id.profile_image_url}",
-                    "follower_count": artist.artist_id.follower_count,
+                    "public_id": artist.artist.public_id,
+                    "name": artist.artist.name,
+                    "role": artist.role,
+                    "profile_image_url": f"{settings.MEDIA_FULL_URL}{artist.artist.profile_image_url}",
                 }
                 for artist in artists
+            ]
+        return None
+
+    def get_songs(self, obj):
+        songs = Album_Song.objects.filter(album=obj.id)
+        if songs is not None:
+            return [
+                {
+                    "order": song.order,
+                    "public_id": song.song.public_id,
+                    "title": song.song.title,
+                    "file_url": f"{settings.MEDIA_FULL_URL}{song.song.file_url}",
+                    "thumbnail_url": f"{settings.MEDIA_FULL_URL}{song.song.thumbnail_url}",
+                    "release_date": song.song.release_date,
+                    "duration": song.song.duration,
+                    "is_explicit": song.song.is_explicit,
+                    "artists": [
+                        {
+                            "public_id": artist.artist.public_id,
+                            "name": artist.artist.name,
+                            "role": artist.role,
+                        }
+                        for artist in Artist_Song.objects.filter(song_id=song.song.id)
+                    ]
+                    if Artist_Song.objects.filter(song_id=song.song.id) is not None
+                    else None,
+                }
+                for song in songs
             ]
         return None
 
 
 class ArtistSerializer(serializers.ModelSerializer):
     profile_image_url = serializers.SerializerMethodField()
-    genre = GenreSerializer(many=True)
-    songs = SongSerializer(many=True)
-    albums = AlbumSerializer(many=True)
+    genres = serializers.SerializerMethodField()
+    songs = serializers.SerializerMethodField()
+    albums = serializers.SerializerMethodField()
 
     class Meta:
         model = Artist
@@ -133,8 +172,7 @@ class ArtistSerializer(serializers.ModelSerializer):
             "name",
             "bio",
             "profile_image_url",
-            "follower_count",
-            "genre",
+            "genres",
             "songs",
             "albums",
         ]
@@ -143,3 +181,71 @@ class ArtistSerializer(serializers.ModelSerializer):
         if obj.profile_image_url:
             return f"{settings.MEDIA_FULL_URL}{obj.profile_image_url}"
         return None
+
+    def get_genres(self, obj):
+        genres = Genre_Song.objects.filter(song=obj.id)
+        if genres is not None:
+            return [genre.genre.name for genre in genres]
+        return None
+
+    def get_songs(self, obj):
+        songs = Artist_Song.objects.filter(artist_id=obj.id)
+        if songs is not None:
+            return [
+                {
+                    "public_id": song.song.public_id,
+                    "title": song.song.title,
+                    "file_url": f"{settings.MEDIA_FULL_URL}{song.song.file_url}",
+                    "thumbnail_url": f"{settings.MEDIA_FULL_URL}{song.song.thumbnail_url}",
+                    "release_date": song.song.release_date,
+                    "duration": song.song.duration,
+                    "is_explicit": song.song.is_explicit,
+                    "version": Version.objects.get(id=song.song.version_id).name,
+                    "genres": [
+                        genre.genre.name
+                        for genre in Genre_Song.objects.filter(song_id=song.song.id)
+                    ]
+                    if Genre_Song.objects.filter(song_id=song.song.id) is not None
+                    else None,
+                    "artists": [
+                        {
+                            "public_id": artist.artist.public_id,
+                            "name": artist.artist.name,
+                            "role": artist.role,
+                        }
+                        for artist in Artist_Song.objects.filter(song_id=song.song.id)
+                    ]
+                    if Artist_Song.objects.filter(song_id=song.song.id) is not None
+                    else None,
+                }
+                for song in songs
+            ]
+        return None
+
+    def get_albums(self, obj):
+        albums = Album_Artist.objects.filter(artist_id=obj.id)
+        if albums is not None:
+            return [
+                {
+                    "public_id": album.album.public_id,
+                    "title": album.album.title,
+                    "thumbnail_url": f"{settings.MEDIA_FULL_URL}{album.album.thumbnail_url}",
+                    "release_date": album.album.release_date,
+                    "release_type": album.album.release_type,
+                    "duration": album.album.duration,
+                    "is_explicit": album.album.is_explicit,
+                    "artists": [
+                        {
+                            "public_id": artist.artist.public_id,
+                            "name": artist.artist.name,
+                            "role": artist.role,
+                        }
+                        for artist in Album_Artist.objects.filter(
+                            album_id=album.album.id
+                        )
+                    ]
+                    if Album_Artist.objects.filter(album_id=album.album.id) is not None
+                    else None,
+                }
+                for album in albums
+            ]

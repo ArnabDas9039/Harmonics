@@ -31,13 +31,15 @@ SECRET_KEY = os.getenv(
 
 # SECURITY WARNING: don't run with debug turned on in production!
 # DEBUG = os.getenv("DEBUG")
-DEBUG = "True"
+DEBUG = True
+# DEBUG = False
 
 ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "").split(",")
+# ALLOWED_HOSTS = ["*"]
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
-        "rest_framework_simplejwt.authentication.JWTAuthentication",
+        "authentication.authentication.CookieJWTAuthentication",
     ),
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticated",
@@ -58,8 +60,14 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "analytics",
     "api",
+    "authentication",
     "content",
+    "engine",
+    "room",
+    "studio",
+    "user",
     "rest_framework",
     "corsheaders",
     "channels",
@@ -179,8 +187,8 @@ STATIC_ROOT = os.path.join(BASE_DIR, "static")
 MEDIA_URL = "media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 # MEDIA_HOST = "http://10.109.53.65/"
-# MEDIA_HOST = "http://127.0.0.1:8000/"
-MEDIA_HOST = ""
+MEDIA_HOST = "http://127.0.0.1:8000/"
+# MEDIA_HOST = ""
 MEDIA_FULL_URL = f"{MEDIA_HOST}{MEDIA_URL}"
 
 # Default primary key field type
@@ -188,5 +196,6 @@ MEDIA_FULL_URL = f"{MEDIA_HOST}{MEDIA_URL}"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-CORS_ALLOW_ALL_ORIGINS = True
-CORS_ALLOWS_CREDENTIALS = True
+# CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOWED_ORIGINS = ["http://localhost:5173"]
+CORS_ALLOW_CREDENTIALS = True
