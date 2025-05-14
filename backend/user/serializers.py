@@ -17,6 +17,7 @@ class CreateUserSerializer(serializers.ModelSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
     username = serializers.SerializerMethodField()
+    profile_image_url = serializers.SerializerMethodField()
 
     class Meta:
         model = User_Data

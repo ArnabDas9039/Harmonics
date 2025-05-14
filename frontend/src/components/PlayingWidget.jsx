@@ -45,6 +45,8 @@ function PlayingWidget() {
   const handlePause = () => dispatch(setIsPlaying(false));
 
   useEffect(() => {
+    if (!audioRef.current) return;
+
     audioRef.current.addEventListener("play", handlePlay);
     audioRef.current.addEventListener("pause", handlePause);
     audioRef.current.addEventListener("loadedmetadata", handleLoadedMetadata);
@@ -54,13 +56,16 @@ function PlayingWidget() {
     handlePlayPause();
 
     return () => {
-      audioRef.current.removeEventListener("play", handlePlay);
-      audioRef.current.removeEventListener("pause", handlePause);
-      audioRef.current.removeEventListener(
-        "loadedmetadata",
-        handleLoadedMetadata
-      );
-      audioRef.current.removeEventListener("timeupdate", handleTimeUpdate);
+      if (audioRef.current) {
+        audioRef.current.removeEventListener("play", handlePlay);
+        audioRef.current.removeEventListener("pause", handlePause);
+        audioRef.current.removeEventListener(
+          "loadedmetadata",
+          handleLoadedMetadata
+        );
+        audioRef.current.removeEventListener("timeupdate", handleTimeUpdate);
+        audioRef.current.removeEventListener("ended", handleSongEnd);
+      }
     };
   }, [playing, isPlaying]);
 

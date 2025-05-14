@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { loginUser } from "../store/authSlice";
-import { useNavigate } from "react-router-dom";
+import { redirect, useNavigate } from "react-router-dom";
 import "../styles/Form.css";
 
 function Login() {
@@ -15,9 +15,8 @@ function Login() {
     e.preventDefault();
     try {
       await dispatch(loginUser({ username, password })).unwrap();
-      navigate(-1);
+      navigate("/profile");
     } catch (err) {
-      // Error is handled by Redux
       console.error("Login failed:", err);
     }
   };

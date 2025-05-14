@@ -2,6 +2,7 @@ import axios from "axios";
 
 const api = axios.create({
   baseURL: "http://localhost:8000",
+  // baseURL: "https://backend-docker-62937624921.us-central1.run.app/",
   withCredentials: true,
 });
 
@@ -25,6 +26,7 @@ api.interceptors.response.use(
         await api.post("/auth/refresh/");
         return api(originalRequest);
       } catch (err) {
+        alert(err);
         store.dispatch(logoutUser());
         window.location.href = "/login";
         return Promise.reject(err);

@@ -20,6 +20,8 @@ class GenreSerializer(serializers.ModelSerializer):
 
 
 class SongSerializer(serializers.ModelSerializer):
+    file_url = serializers.SerializerMethodField()
+    thumbnail_url = serializers.SerializerMethodField()
     genres = serializers.SerializerMethodField()
     version = serializers.SerializerMethodField()
     artists = serializers.SerializerMethodField()
@@ -94,6 +96,7 @@ class SongSerializer(serializers.ModelSerializer):
 
 
 class AlbumSerializer(serializers.ModelSerializer):
+    thumbnail_url = serializers.SerializerMethodField()
     songs = serializers.SerializerMethodField()
     artists = serializers.SerializerMethodField()
 
