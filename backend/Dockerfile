@@ -9,19 +9,11 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the application code
 COPY . .
 
-# Environment variables
-# ENV PYTHONDONTWRITEBYTECODE 1
-# ENV PYTHONUNBUFFERED 1
-# ENV DJANGO_SETTINGS_MODULE=backend.settings
-
-# Copy the SQLite database if it exists
-# COPY db.sqlite3 /app/db.sqlite3
-
 # RUN python manage.py migrate
 RUN python manage.py collectstatic --noinput
 
 # Expose the port
-EXPOSE 8000
+EXPOSE 8080
 
 # Run the application
-CMD ["uvicorn", "backend.asgi:application", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "backend.asgi:application", "--host", "0.0.0.0", "--port", "8080"]

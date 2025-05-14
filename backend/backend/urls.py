@@ -9,6 +9,7 @@ from django.conf.urls.static import static
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("auth/login/", av.LoginView.as_view()),
+    # path("auth/check/", av.CheckView.as_view()),
     path("auth/refresh/", av.RefreshView.as_view()),
     path("auth/logout/", av.LogoutView.as_view()),
     path("api-auth/", include("rest_framework.urls")),

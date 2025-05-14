@@ -17,7 +17,7 @@ import {
   Playlist_Info,
 } from "./pages/Info";
 import PlayingWidget from "./components/PlayingWidget";
-import { logoutUser } from "./store/authSlice";
+import { logoutUser, checkauthstatus } from "./store/authSlice";
 
 function Logout() {
   const dispatch = useDispatch();
@@ -34,13 +34,14 @@ function App() {
   const { isAuthorized, loading } = useSelector((state) => state.auth);
 
   // useEffect(() => {
-  //   const checkAuth = async () => {
-  //     // if (!isAuthorized && !loading) {
-  //     dispatch(checkAuthStatus());
-  //     // }
-  //   };
-  //   checkAuth();
-  // }, []);
+  //   dispatch(checkauthstatus());
+
+  //   const interval = setInterval(() => {
+  //     dispatch(checkauthstatus());
+  //   }, 5 * 60 * 1000);
+
+  //   return () => clearInterval(interval);
+  // }, [dispatch]);
 
   if (loading) {
     return <div>Loading...</div>;
