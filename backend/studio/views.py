@@ -9,7 +9,7 @@ from content import models as cm
 # Create your views here.
 
 
-class SongListView(generics.ListAPIView):
+class ContentView(generics.ListAPIView):
     serializer_class = ss.SongSerializer
     permission_classes = [AllowAny]
 
@@ -17,10 +17,71 @@ class SongListView(generics.ListAPIView):
         return cm.Song.objects.filter()
 
 
-class SongInfoView(generics.RetrieveAPIView):
+class SongView(generics.RetrieveAPIView):
     serializer_class = ss.SongSerializer
     permission_classes = [AllowAny]
     lookup_field = "public_id"
 
     def get_queryset(self):
-        return cm.Song.objects.filter(public_id=self.kwargs["public_id"])
+        return cm.Song.objects.filter()
+
+
+class ArtistView(generics.RetrieveAPIView):
+    serializer_class = ss.ArtistSerializer
+    permission_classes = [AllowAny]
+    lookup_field = "public_id"
+
+    def get_queryset(self):
+        return cm.Artist.objects.filter()
+
+
+class AlbumView(generics.RetrieveAPIView):
+    serializer_class = ss.AlbumSerializer
+    permission_classes = [AllowAny]
+    lookup_field = "public_id"
+
+    def get_queryset(self):
+        return cm.Album.objects.filter()
+
+
+class CreateSongView(generics.CreateAPIView):
+    serializer_class = ss.SongSerializer
+    permission_classes = [IsAuthenticated]
+    queryset = cm.Song.objects.all()
+
+
+class CreateArtistView(generics.CreateAPIView):
+    serializer_class = ss.ArtistSerializer
+    permission_classes = [IsAuthenticated]
+
+
+class CreateAlbumView(generics.CreateAPIView):
+    serializer_class = ss.AlbumSerializer
+    permission_classes = [IsAuthenticated]
+
+
+class UpdateSongView(generics.UpdateAPIView):
+    serializer_class = ss.SongSerializer
+    permission_classes = [IsAuthenticated]
+    lookup_field = "public_id"
+
+    def get_queryset(self):
+        return cm.Song.objects.filter()
+
+
+class UpdateArtistView(generics.UpdateAPIView):
+    serializer_class = ss.ArtistSerializer
+    permission_classes = [IsAuthenticated]
+    lookup_field = "public_id"
+
+    def get_queryset(self):
+        return cm.Artist.objects.filter()
+
+
+class UpdateAlbumView(generics.UpdateAPIView):
+    serializer_class = ss.AlbumSerializer
+    permission_classes = [IsAuthenticated]
+    lookup_field = "public_id"
+
+    def get_queryset(self):
+        return cm.Album.objects.filter()

@@ -32,8 +32,6 @@ function PlayingWidget() {
   const audioRef = useRef(null);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
-  // const { playing, setPlaying, isPlaying, setIsPlaying, queue, setQueue } =
-  //   useContext(PlayingContext);
   const { isPlaying, playing, queue } = useSelector((state) => state.play);
   const [showPlayingPage, setShowPlayingPage] = useState(false);
   const [isLoading, setIsLoading] = useState(true);

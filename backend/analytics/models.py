@@ -15,20 +15,3 @@ class Song_Data(models.Model):
     play_count = models.PositiveIntegerField(default=0)
     like_count = models.PositiveIntegerField(default=0)
     dislike_count = models.PositiveIntegerField(default=0)
-
-
-class Song_Interaction(models.Model):
-    id = models.BigAutoField(primary_key=True)
-    song = models.ForeignKey(Song, on_delete=models.CASCADE)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    interaction_type = models.CharField(
-        max_length=10,
-        choices=[
-            ("like", "Like"),
-            ("dislike", "Dislike"),
-            ("play", "Play"),
-            ("save", "Save"),
-            ("share", "Share"),
-        ],
-    )
-    created_at = models.DateTimeField(auto_now_add=True)

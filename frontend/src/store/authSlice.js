@@ -25,18 +25,6 @@ export const logoutUser = createAsyncThunk(
   }
 );
 
-export const checkauthstatus = createAsyncThunk(
-  "auth/check",
-  async (_, { rejectWithValue }) => {
-    try {
-      const response = await api.get("/auth/check/");
-      return response.data.status;
-    } catch (error) {
-      return rejectWithValue(error.response?.data?.detail || "Check failed");
-    }
-  }
-);
-
 const initialState = {
   isAuthorized: false,
   error: null,
@@ -75,16 +63,6 @@ const authSlice = createSlice({
       })
       .addCase(logoutUser.rejected, (state, action) => {
         state.isAuthorized = true;
-        state.loading = false;
-        state.error = action.payload;
-      })
-      // Check status
-      .addCase(checkauthstatus.fulfilled, (state, action) => {
-        state.isAuthorized = action.payload;
-        state.error = null;
-      })
-      .addCase(checkauthstatus.rejected, (state, action) => {
-        state.isAuthorized = false;
         state.loading = false;
         state.error = action.payload;
       });

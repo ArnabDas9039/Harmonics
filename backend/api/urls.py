@@ -1,18 +1,29 @@
 from django.urls import path
 from . import views
+from studio import views as sv
 
 urlpatterns = [
     path("profile/", views.UserView.as_view(), name="profile"),
+    path("user/create/", views.CreateUserView.as_view(), name="user_create"),
     # path("search/", views.SearchView.as_view(), name="search"),
     path("feed/", views.UserFeedView.as_view(), name="feed"),
     path("song/<public_id>", views.SongView.as_view(), name="song_info"),
     path("artist/<public_id>", views.ArtistView.as_view(), name="artist_info"),
     path("album/<public_id>", views.AlbumView.as_view(), name="album_info"),
-    # path("playlist/<id>", views.PlaylistView.as_view(), name="playlist_info"),
+    path("song/interact/", views.SongInteractView.as_view(), name="song_interaction"),
+    path(
+        "artist/interact/", views.ArtistInteractView.as_view(), name="song_interaction"
+    ),
+    # path("playlist/<public_id>", views.PlaylistView.as_view(), name="playlist_info"),
     # path(
-    #     "playlist/<id>/update/",
+    #     "playlist/create/",
+    #     views.CreatePlaylistView.as_view(),
+    #     name="playlist_create",
+    # ),
+    # path(
+    #     "playlist/update/",
     #     views.UpdatePlaylistView.as_view(),
-    #     name="playlist_info",
+    #     name="playlist_uodate",
     # ),
     path("library/post/", views.CreateLibraryView.as_view(), name="library_post"),
     path("library/", views.LibraryView.as_view(), name="library"),

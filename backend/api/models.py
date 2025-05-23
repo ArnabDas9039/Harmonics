@@ -1,27 +1,58 @@
-# from django.db import models
-# from django.contrib.auth.models import User
-# from django.contrib.contenttypes.fields import GenericForeignKey
-# from django.contrib.contenttypes.models import ContentType
+import secrets
+import string
+from django.db import models
+from django.contrib.auth.models import User
+import content.models as cm
 
 
-# # Create your models here.
-# class Playlist(models.Model):
-#     id = models.CharField(max_length=16, primary_key=True)
-#     name = models.CharField(max_length=64)
-#     user = models.ForeignKey(User, on_delete=models.CASCADE)
-#     description = models.TextField()
-#     songs = models.ManyToManyField(Song, related_name="tracks")
-#     created_at = models.DateTimeField()
-#     last_updated = models.DateTimeField()
-#     cover_image_url = models.ImageField(
-#         upload_to="images/playlist_cover_image",
-#         blank=False,
-#         default="images/playlist_cover_image/default_image.png",
-#     )
-#     private = models.BooleanField(default=False)
+# Create your models here.
+def generate_random_id(length=10):
+    characters = string.ascii_letters + string.digits
+    return "".join(secrets.choice(characters) for i in range(length))
 
-#     def __str__(self):
-#         return f"{self.name}"
+
+class Playlist(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    public_id = models.CharField(max_length=10, unique=True, blank=True, editable=False)
+    title = models.CharField(max_length=255)
+    description = models.TextField()
+    thumbnail_url = models.ImageField(
+        upload_to="images/playlist_thumbnail",
+        blank=False,
+        default="images/playlist_thumbnail/default_image.png",
+    )
+    duration = models.DurationField()
+    owner = models.ForeignKey(User, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    last_updated = models.DateTimeField(auto_now_add=True)
+    privacy = models.CharField(
+        max_length=10, choices=[("Private", "Private"), ("Public", "Public")]
+    )
+
+    def __str__(self):
+        return f"{self.public_id}"
+
+    def save(self, *args, **kwargs):
+        if not self.public_id:
+            while True:
+                random_id = generate_random_id()
+                if not cm.Song.objects.filter(public_id=random_id).exists():
+                    self.public_id = random_id
+                    break
+        super().save(*args, **kwargs)
+
+
+class Playlist_Song(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    song = models.ForeignKey(cm.Song, on_delete=models.CASCADE)
+    playlist = models.ForeignKey(Playlist, on_delete=models.CASCADE)
+    order = models.PositiveIntegerField()
+
+
+class Playlist_Collaborator(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    playlist = models.ForeignKey(Playlist, on_delete=models.CASCADE)
+    collaborator = models.ForeignKey(User, on_delete=models.CASCADE)
 
 
 # class Radio(models.Model):

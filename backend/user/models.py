@@ -3,9 +3,11 @@ from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
 from engine.models import Group
+import content.models as cm
 
 
 class User_Data(models.Model):
+    id = models.BigAutoField(primary_key=True)
     user = models.ForeignKey(User, unique=True, on_delete=models.CASCADE)
     profile_image_url = models.ImageField(
         upload_to="images/user_profile",
@@ -20,6 +22,7 @@ class User_Data(models.Model):
 
 
 class User_History(models.Model):
+    id = models.BigAutoField(primary_key=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField()
@@ -28,6 +31,7 @@ class User_History(models.Model):
 
 
 class User_Library(models.Model):
+    id = models.BigAutoField(primary_key=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField()
@@ -36,9 +40,41 @@ class User_Library(models.Model):
 
 
 class User_Feed(models.Model):
+    id = models.BigAutoField(primary_key=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField()
     content_object = GenericForeignKey("content_type", "object_id")
     group = models.ForeignKey(Group, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+
+class User_Song_Interaction(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    song = models.ForeignKey(cm.Song, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    interaction_type = models.CharField(
+        max_length=10,
+        choices=[
+            ("Like", "Like"),
+            ("Dislike", "Dislike"),
+            ("Play", "Play"),
+            ("Save", "Save"),
+            ("Share", "Share"),
+        ],
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+
+class User_Artist_Interaction(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    song = models.ForeignKey(cm.Artist, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    interaction_type = models.CharField(
+        max_length=10,
+        choices=[
+            ("Follow", "Follow"),
+            ("Play", "Play"),
+        ],
+    )
     created_at = models.DateTimeField(auto_now_add=True)

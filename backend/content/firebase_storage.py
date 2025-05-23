@@ -21,10 +21,8 @@ class FirebaseStorage(Storage):
         return ContentFile(content)
 
     def _save(self, name, content):
-        # print("Saving to Firebase")
         blob = self.bucket.blob(name)
         content_type = getattr(content, "content_type", None)
-        # print(content_type)
         blob.upload_from_file(content.file, content_type=content_type)
         return name
 

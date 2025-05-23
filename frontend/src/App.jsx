@@ -17,7 +17,8 @@ import {
   Playlist_Info,
 } from "./pages/Info";
 import PlayingWidget from "./components/PlayingWidget";
-import { logoutUser, checkauthstatus } from "./store/authSlice";
+import { logoutUser } from "./store/authSlice";
+import SongUploadForm from "./pages/Upload";
 
 function Logout() {
   const dispatch = useDispatch();
@@ -32,16 +33,6 @@ function Logout() {
 function App() {
   const dispatch = useDispatch();
   const { isAuthorized, loading } = useSelector((state) => state.auth);
-
-  // useEffect(() => {
-  //   dispatch(checkauthstatus());
-
-  //   const interval = setInterval(() => {
-  //     dispatch(checkauthstatus());
-  //   }, 5 * 60 * 1000);
-
-  //   return () => clearInterval(interval);
-  // }, [dispatch]);
 
   if (loading) {
     return <div>Loading...</div>;
@@ -74,6 +65,7 @@ function App() {
           element={isAuthorized ? <Navigate to="/profile" /> : <Login />}
         />
         <Route path="/logout" element={<Logout />} />
+        <Route path="/upload" element={<SongUploadForm />} />
         <Route
           path="/register"
           element={isAuthorized ? <Navigate to="/profile" /> : <Register />}

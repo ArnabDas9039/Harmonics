@@ -11,6 +11,7 @@ from content import models as cm
 from analytics import models as alm
 from user import models as um
 from user import serializers as us
+from . import models as apim
 from . import serializers as apis
 
 from rest_framework.permissions import IsAuthenticated, AllowAny
@@ -92,49 +93,55 @@ class AlbumView(generics.RetrieveAPIView):
         return cm.Album.objects.filter(public_id=self.kwargs["public_id"])
 
 
+class SongInteractView(generics.CreateAPIView):
+    serializer_class = apis.SongInteractionSerializer
+    permission_classes = [IsAuthenticated]
+
+    def create(self):
+        pass
+
+
+class ArtistInteractView(generics.CreateAPIView):
+    serializer_class = apis.ArtistInteractionSerializer
+    permission_classes = [IsAuthenticated]
+
+    def create(self):
+        pass
+
+
 # class PlaylistView(generics.RetrieveAPIView):
-#     serializer_class = PlaylistSerializer
+#     serializer_class = apis.PlaylistSerializer
 #     permission_classes = [AllowAny]
-#     lookup_field = "id"
+#     lookup_field = "public_id"
 
 #     def get_queryset(self):
-#         return Playlist.objects.all()
+#         return apim.Playlist.objects.filter(public_id=self.kwargs["public_id"])
 
 
 # class PlaylistListView(generics.ListAPIView):
-#     serializer_class = PlaylistSerializer
-#     permission_classes = [AllowAny]
-
-#     def get_queryset(self):
-#         objects = list(Playlist.objects.filter(private=False))
-#         seed = self.request.GET.get("seed")
-#         if seed is not None:
-#             random.seed(seed)  # set seed
-#             random.shuffle(objects)  # randomize objects
-#             random.seed()  # reset seed
-#         return objects
-
-
-# class PlaylistListSecureView(generics.ListAPIView):
-#     serializer_class = PlaylistSerializer
+#     serializer_class = apis.PlaylistSerializer
 #     permission_classes = [IsAuthenticated]
 
 #     def get_queryset(self):
-#         user = self.request.user
-#         return Playlist.objects.filter(user=user)
+#         return apim.Playlist.objects.filter(user=self.request.user)
+
+
+# class CreatePlaylistView(generics.CreateAPIView):
+#     serializer_class = apis.PlaylistSerializer
+#     permission_classes = [IsAuthenticated]
+
+#     def create(self, request, *args, **kwargs):
+#         # data=self.request.
+#         pass
 
 
 # class UpdatePlaylistView(generics.UpdateAPIView):
-#     serializer_class = CreatePlaylistSerializer
-#     permission_classes = [AllowAny]
-#     lookup_field = "id"
+#     serializer_class = apis.PlaylistSerializer
+#     permission_classes = [IsAuthenticated]
 
 #     def put(self, request, id=None):
-#         # logger.debug('Request data: %s', request.data)
 #         try:
 #             playlist = self.get_object()
-#             # logger.debug('Playlist: %s', playlist.id)
-
 #             song_id = request.data.get("song_id")
 #             if not song_id:
 #                 return Response(
@@ -144,28 +151,18 @@ class AlbumView(generics.RetrieveAPIView):
 
 #             try:
 #                 song = Song.objects.get(id=song_id)
-#                 # logger.debug('Song retrieved: %s', song.id)
 #             except Song.DoesNotExist:
 #                 return Response(
 #                     {"detail": "Song not found."}, status=status.HTTP_404_NOT_FOUND
 #                 )
-
-#             # Add the new song to the playlist without replacing the entire set
 #             playlist.songs.add(song)
 #             playlist.save()
-
 #             serializer = self.serializer_class(playlist)
 #             return Response(serializer.data, status=status.HTTP_200_OK)
 #         except Playlist.DoesNotExist:
 #             return Response(
 #                 {"detail": "Playlist not found."}, status=status.HTTP_404_NOT_FOUND
 #             )
-
-#     def get_object(self):
-#         queryset = Playlist.objects.filter(user=self.request.user)
-#         obj = generics.get_object_or_404(queryset, id=self.kwargs["id"])
-#         # logger.debug('Retrieved playlist: %s', obj)
-#         return obj
 
 
 # class UserView(generics.RetrieveAPIView):
@@ -428,3 +425,8 @@ class UserView(generics.RetrieveAPIView):
 
     def get_object(self):
         return um.User_Data.objects.get(user=self.request.user)
+
+
+class CreateUserView(generics.RetrieveAPIView):
+    serializer_class = us.UserSerializer
+    permission_classes = [IsAuthenticated]

@@ -1,6 +1,7 @@
-@import "./color/light.css";
+@import "./css/light.css";
 
-/* @import "color/dark.css"; */
+/* @import "./css/dark.css"; */
+
 body {
     font-family: Roboto, Arial;
     margin: 0;

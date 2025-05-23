@@ -9,17 +9,6 @@ from analytics import serializers as als
 from user import models as um
 
 
-# class UserSerializer(serializers.Serializer):
-
-
-# class GenreSerializer(serializers.ModelSerializer):
-#     artist_genres = ArtistShortSerializer(many=True)
-
-#     class Meta:
-#         model = Genre
-#         fields = "__all__"
-
-
 class ArtistSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         data = cs.ArtistSerializer(instance).data
@@ -42,10 +31,16 @@ class SongSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         data = cs.SongSerializer(instance, context=self.context).data
         analytics_instance = alm.Song_Data.objects.get(song=instance.id)
+        # interactions = alm.Song_Interaction.objects.get(
+        #     song=instance.id, user=self.request.user
+        # )
         if analytics_instance:
             analytics_data = als.SongAnalyticsSerializer(analytics_instance).data
             data["analytics"] = analytics_data
-            return data
+        # if interactions:
+        #     pass
+        #     interaction_data = als.InteractionSerializer(interactions).data
+        #     data["interaction"] = interaction_data
         return data
 
 
@@ -59,6 +54,22 @@ class AlbumSerializer(serializers.ModelSerializer):
                 analytics_data = als.SongAnalyticsSerializer(analytics_instance).data
                 song["analytics"] = analytics_data
         return data
+
+
+class SongInteractionSerializer(serializers.ModelSerializer):
+    song = serializers.SerializerMethodField()
+
+    class Meta:
+        model = um.User_Song_Interaction
+        fields = []
+
+
+class ArtistInteractionSerializer(serializers.ModelSerializer):
+    artist = serializers.SerializerMethodField()
+
+    class Meta:
+        model = um.User_Artist_Interaction
+        fields = []
 
 
 # class PlaylistSerializer(serializers.ModelSerializer):

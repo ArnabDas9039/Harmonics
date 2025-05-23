@@ -73,6 +73,7 @@ class Song(models.Model):
     duration = models.DurationField()
     is_explicit = models.BooleanField(default=False)
     version = models.ForeignKey(Version, on_delete=models.CASCADE)
+    # created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"{self.public_id}"
@@ -111,7 +112,7 @@ class Artist_Song(models.Model):
     id = models.BigAutoField(primary_key=True)
     song = models.ForeignKey(Song, on_delete=models.CASCADE)
     artist = models.ForeignKey(Artist, on_delete=models.CASCADE)
-    role = models.CharField(max_length=255)
+    role = models.CharField(max_length=255, default="Singer")
 
 
 class Album(models.Model):
@@ -149,6 +150,10 @@ class Album_Song(models.Model):
     song = models.ForeignKey(Song, on_delete=models.CASCADE)
     album = models.ForeignKey(Album, on_delete=models.CASCADE)
     order = models.PositiveIntegerField()
+
+    class Meta:
+        unique_together = ("album", "song")
+        ordering = ["order"]
 
 
 class Album_Artist(models.Model):

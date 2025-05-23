@@ -1,13 +1,15 @@
 from django.urls import path
 from . import views
-from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 urlpatterns = [
-    path("token/", TokenObtainPairView.as_view(), name="get_token"),
-    path("token/refresh/", TokenRefreshView.as_view(), name="refresh"),
-    # path("user/<username>", views.UserView.as_view(), name="profile"),
-    # # path("search/", views.SearchView.as_view(), name="search"),
-    path("song/<public_id>", views.SongInfoView.as_view(), name="song_info"),
-    # path("artist/<public_id>", views.ArtistView.as_view(), name="artist_info"),
-    # path("album/<public_id>", views.AlbumView.as_view(), name="album_info"),
+    path("content/", views.ContentView.as_view(), name="content"),
+    path("song/<public_id>", views.SongView.as_view(), name="song_info"),
+    path("artist/<public_id>", views.ArtistView.as_view(), name="artist_info"),
+    path("album/<public_id>", views.AlbumView.as_view(), name="album_info"),
+    path("song/create/", views.CreateSongView.as_view(), name="song_info"),
+    path("artist/post/", views.CreateArtistView.as_view(), name="artist_info"),
+    path("album/post/", views.CreateAlbumView.as_view(), name="album_info"),
+    path("song/<public_id>/update/", views.UpdateSongView.as_view(), name="song_info"),
+    path("artist/edit/", views.UpdateArtistView.as_view(), name="artist_info"),
+    path("album/edit/", views.UpdateAlbumView.as_view(), name="album_info"),
 ]

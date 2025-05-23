@@ -9,17 +9,17 @@ function Header(props) {
   const { isAuthorized, username } = useSelector((state) => state.auth);
   const [profile, setProfile] = useState({});
 
-  // useEffect(() => {
-  //   if (isAuthorized) {
-  //     api
-  //       .get("/api/me/")
-  //       .then((res) => res.data)
-  //       .then((data) => {
-  //         setProfile(data);
-  //       })
-  //       .catch((err) => alert(err));
-  //   }
-  // }, [isAuthorized]);
+  useEffect(() => {
+    if (isAuthorized) {
+      api
+        .get("/api/profile/")
+        .then((res) => res.data)
+        .then((data) => {
+          setProfile(data);
+        })
+        .catch((err) => alert(err));
+    }
+  }, [isAuthorized]);
 
   return (
     <div className="header">
