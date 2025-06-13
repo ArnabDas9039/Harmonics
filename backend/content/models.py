@@ -73,7 +73,6 @@ class Song(models.Model):
     duration = models.DurationField()
     is_explicit = models.BooleanField(default=False)
     version = models.ForeignKey(Version, on_delete=models.CASCADE)
-    # created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"{self.public_id}"
@@ -95,11 +94,17 @@ class Song_Version(models.Model):
         Song, on_delete=models.CASCADE, related_name="refer_song"
     )
 
+    class Meta:
+        unique_together = ("song", "refer_song")
+
 
 class Artist_Genre(models.Model):
     id = models.BigAutoField(primary_key=True)
     artist = models.ForeignKey(Artist, on_delete=models.CASCADE)
     genre = models.ForeignKey(Genre, on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = ("artist", "genre")
 
 
 class Genre_Song(models.Model):
@@ -107,12 +112,18 @@ class Genre_Song(models.Model):
     song = models.ForeignKey(Song, on_delete=models.CASCADE)
     genre = models.ForeignKey(Genre, on_delete=models.CASCADE)
 
+    class Meta:
+        unique_together = ("genre", "song")
+
 
 class Artist_Song(models.Model):
     id = models.BigAutoField(primary_key=True)
     song = models.ForeignKey(Song, on_delete=models.CASCADE)
     artist = models.ForeignKey(Artist, on_delete=models.CASCADE)
     role = models.CharField(max_length=255, default="Singer")
+
+    class Meta:
+        unique_together = ("artist", "song")
 
 
 class Album(models.Model):
@@ -161,3 +172,6 @@ class Album_Artist(models.Model):
     artist = models.ForeignKey(Artist, on_delete=models.CASCADE)
     album = models.ForeignKey(Album, on_delete=models.CASCADE)
     role = models.CharField(max_length=255)
+
+    class Meta:
+        unique_together = ("album", "artist")

@@ -11,11 +11,11 @@ class Song_Owner(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
 
-class Song_Collaborator(models.Model):
-    id = models.BigAutoField(primary_key=True)
-    song = models.ForeignKey(cm.Song, on_delete=models.CASCADE)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    # permission
+# class Song_Collaborator(models.Model):
+#     id = models.BigAutoField(primary_key=True)
+#     song = models.ForeignKey(cm.Song, on_delete=models.CASCADE)
+#     user = models.ForeignKey(User, on_delete=models.CASCADE)
+#     # permission
 
 
 class Album_Owner(models.Model):
@@ -25,11 +25,11 @@ class Album_Owner(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
 
-class Album_Collaborator(models.Model):
-    id = models.BigAutoField(primary_key=True)
-    album = models.ForeignKey(cm.Album, on_delete=models.CASCADE)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    # permission
+# class Album_Collaborator(models.Model):
+#     id = models.BigAutoField(primary_key=True)
+#     album = models.ForeignKey(cm.Album, on_delete=models.CASCADE)
+#     user = models.ForeignKey(User, on_delete=models.CASCADE)
+#     # permission
 
 
 class Artist_Owner(models.Model):

@@ -26,6 +26,9 @@ import {
   UpArrowIcon,
   LikeIcon,
   AddToPlaylistIcon,
+  DislikeIcon,
+  FilledLikeIcon,
+  CheckPlaylistIcon,
 } from "../assets/Icons";
 
 function PlayingWidget() {
@@ -151,11 +154,50 @@ function PlayingWidget() {
 
   const handleLike = async () => {
     try {
-      const response = api.put("api/library/post/", {
-        song_id: playing.public_id,
+      const response = await api.post("api/interact/toggle/", {
+        content_type: "song",
+        object_id: playing.public_id,
+        interaction_type: "Like",
+      });
+      console.log(response);
+      const currentInteractions = playing.interactions || [];
+      let updatedInteractions;
+
+      if (response.data.detail === "Added") {
+        updatedInteractions = [
+          ...currentInteractions,
+          { interaction_type: response.data.interaction_type },
+        ];
+      } else if (response.data.detail === "Removed") {
+        updatedInteractions = currentInteractions.filter(
+          (item) => item.interaction_type !== "Like"
+        );
+      }
+      const updatedPlaying = {
+        ...playing,
+        interactions: updatedInteractions,
+      };
+      dispatch(setPlaying(updatedPlaying));
+    } catch (err) {
+      alert(err);
+    }
+  };
+  const handleSave = async () => {
+    try {
+      const response = await api.post("api/interact/", {
+        content_type: "song",
+        object_id: playing.public_id,
+        interaction_type: "Save",
       });
       if (response.status === 201) {
-        alert("Song added to library");
+        const currentInteractions = playing.interactions || [];
+
+        const updatedPlaying = {
+          ...playing,
+          interactions: [...currentInteractions, response.data],
+        };
+
+        dispatch(setPlaying(updatedPlaying));
       }
     } catch (err) {
       alert(err);
@@ -268,12 +310,31 @@ function PlayingWidget() {
                 <div className="extra-controls-section">
                   <div className="controls">
                     <button className="controls-button" onClick={handleLike}>
-                      <IconSVG>{LikeIcon}</IconSVG>
+                      <IconSVG>
+                        {playing.interactions?.some(
+                          (interaction) =>
+                            interaction.interaction_type === "Like"
+                        )
+                          ? FilledLikeIcon
+                          : LikeIcon}
+                      </IconSVG>
                     </button>
                   </div>
+                  {/* <div className="controls">
+                    <button className="controls-button" onClick={handleLike}>
+                      <IconSVG>{DislikeIcon}</IconSVG>
+                    </button>
+                  </div> */}
                   <div className="controls">
-                    <button className="controls-button">
-                      <IconSVG>{AddToPlaylistIcon}</IconSVG>
+                    <button className="controls-button" onClick={handleSave}>
+                      <IconSVG>
+                        {playing.interactions?.some(
+                          (interaction) =>
+                            interaction.interaction_type === "Save"
+                        )
+                          ? CheckPlaylistIcon
+                          : AddToPlaylistIcon}
+                      </IconSVG>
                     </button>
                   </div>
                   <div className="controls">
@@ -326,7 +387,7 @@ function PlayingWidget() {
                 <div className="tab">Up Next</div>
                 <div className="song-queue-list queue-thumbnails">
                   {queue?.map((song) => (
-                    <GridThumbnail item={song} key={song.id} />
+                    <GridThumbnail item={song} key={song.public_id} />
                   ))}
                 </div>
               </div>
@@ -416,12 +477,24 @@ function PlayingWidget() {
               <div className="widget-right-section">
                 <div className="controls">
                   <button className="controls-button" onClick={handleLike}>
-                    <IconSVG>{LikeIcon}</IconSVG>
+                    <IconSVG>
+                      {playing.interactions?.some(
+                        (interaction) => interaction.interaction_type === "Like"
+                      )
+                        ? FilledLikeIcon
+                        : LikeIcon}
+                    </IconSVG>
                   </button>
                 </div>
                 <div className="controls">
-                  <button className="controls-button">
-                    <IconSVG>{AddToPlaylistIcon}</IconSVG>
+                  <button className="controls-button" onClick={handleSave}>
+                    <IconSVG>
+                      {playing.interactions?.some(
+                        (interaction) => interaction.interaction_type === "Save"
+                      )
+                        ? CheckPlaylistIcon
+                        : AddToPlaylistIcon}
+                    </IconSVG>
                   </button>
                 </div>
                 <div className="controls">

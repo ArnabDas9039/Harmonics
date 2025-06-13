@@ -74,17 +74,8 @@
     background-color: var(--md-sys-color-secondary-container);
 }
 
-.playing-widget .play-pause-controls :hover,
-.playing-page .play-pause-controls :hover {
-    background-color: var(--md-sys-color-primary);
-}
-
 .play-pause {
     background-color: var(--md-sys-color-primary-container);
-}
-
-.play-pause:hover {
-    background-color: var(--md-sys-color-primary);
 }
 
 .playing-page {

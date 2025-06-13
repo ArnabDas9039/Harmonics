@@ -1,84 +1,279 @@
-# from django.conf import settings
+from django.conf import settings
 from django.contrib.auth.models import User
+from django.db import models, transaction
+from django.contrib.contenttypes.models import ContentType
 from rest_framework import serializers
+from .models import Playlist, Playlist_Song, Playlist_Collaborator
 from content import serializers as cs
 from content import models as cm
 from analytics import models as alm
 from engine import models as em
 from analytics import serializers as als
 from user import models as um
+from user import serializers as us
+import json
 
 
 class ArtistSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
+        request = self.context.get("request")
         data = cs.ArtistSerializer(instance).data
-        analytics_instance = alm.Artist_Data.objects.get(artist=instance.id)
-        if analytics_instance:
-            analytics_data = als.ArtistAnalyticsSerializer(analytics_instance).data
+        content_type = ContentType.objects.get(app_label="content", model="artist")
+        song_content_type = ContentType.objects.get(app_label="content", model="song")
+        try:
+            analytics_instance = alm.Content_Data.objects.get(
+                content_type=content_type, object_id=instance.id
+            )
+            analytics_data = als.AnalyticsSerializer(analytics_instance).data
             data["analytics"] = analytics_data
+        except alm.Content_Data.DoesNotExist:
+            data["analytics"] = None
+        # if request.user.is_authenticated:
+        #     try:
         for song in data["songs"]:
             song_instance = cm.Song.objects.get(public_id=song["public_id"])
-            song_analytics_instance = alm.Song_Data.objects.get(song=song_instance.id)
-            if song_analytics_instance:
-                song_analytics_data = als.SongAnalyticsSerializer(
+            try:
+                song_analytics_instance = alm.Content_Data.objects.get(
+                    content_type=song_content_type, object_id=song_instance.id
+                )
+                song_analytics_data = als.AnalyticsSerializer(
                     song_analytics_instance
                 ).data
                 song["analytics"] = song_analytics_data
+            except alm.Content_Data.DoesNotExist:
+                song["analytics"] = None
         return data
 
 
 class SongSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
+        request = self.context.get("request")
         data = cs.SongSerializer(instance, context=self.context).data
-        analytics_instance = alm.Song_Data.objects.get(song=instance.id)
-        # interactions = alm.Song_Interaction.objects.get(
-        #     song=instance.id, user=self.request.user
-        # )
-        if analytics_instance:
-            analytics_data = als.SongAnalyticsSerializer(analytics_instance).data
+        content_type = ContentType.objects.get(app_label="content", model="song")
+        try:
+            analytics_instance = alm.Content_Data.objects.get(
+                content_type=content_type, object_id=instance.id
+            )
+            analytics_data = als.AnalyticsSerializer(analytics_instance).data
             data["analytics"] = analytics_data
-        # if interactions:
-        #     pass
-        #     interaction_data = als.InteractionSerializer(interactions).data
-        #     data["interaction"] = interaction_data
+        except alm.Content_Data.DoesNotExist:
+            data["analytics"] = None
+        if request.user.is_authenticated:
+            try:
+                interactions = um.User_Content_Interaction.objects.filter(
+                    content_type=content_type,
+                    object_id=instance.id,
+                    user=request.user,
+                )
+                interactions_data = ContentInteractionSerializer(
+                    interactions, many=True
+                ).data
+                data["interactions"] = interactions_data
+            except um.User_Content_Interaction.DoesNotExist:
+                data["interactions"] = None
         return data
 
 
 class AlbumSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
+        request = self.context.get("request")
         data = cs.AlbumSerializer(instance, context=self.context).data
+        content_type = ContentType.objects.get(app_label="content", model="album")
+        song_content_type = ContentType.objects.get(app_label="content", model="song")
+        try:
+            analytics_instance = alm.Content_Data.objects.get(
+                content_type=content_type, object_id=instance.id
+            )
+            analytics_data = als.AnalyticsSerializer(analytics_instance).data
+            data["analytics"] = analytics_data
+        except alm.Content_Data.DoesNotExist:
+            data["analytics"] = None
+        if request.user.is_authenticated:
+            try:
+                interactions = um.User_Content_Interaction.objects.filter(
+                    content_type=content_type,
+                    object_id=instance.id,
+                    user=request.user,
+                )
+                interactions_data = ContentInteractionSerializer(
+                    interactions, many=True
+                ).data
+                data["interactions"] = interactions_data
+            except um.User_Content_Interaction.DoesNotExist:
+                data["interactions"] = None
         for song in data["songs"]:
             song_instance = cm.Song.objects.get(public_id=song["public_id"])
-            analytics_instance = alm.Song_Data.objects.get(song=song_instance.id)
-            if analytics_instance:
-                analytics_data = als.SongAnalyticsSerializer(analytics_instance).data
-                song["analytics"] = analytics_data
+            try:
+                song_analytics_instance = alm.Content_Data.objects.get(
+                    content_type=song_content_type, object_id=song_instance.id
+                )
+                song_analytics_data = als.AnalyticsSerializer(
+                    song_analytics_instance
+                ).data
+                song["analytics"] = song_analytics_data
+            except alm.Content_Data.DoesNotExist:
+                song["analytics"] = None
+            if request.user.is_authenticated:
+                try:
+                    song_interactions = um.User_Content_Interaction.objects.filter(
+                        content_type=song_content_type,
+                        object_id=song_instance.id,
+                        user=request.user,
+                    )
+                    song_interactions_data = ContentInteractionSerializer(
+                        song_interactions, many=True
+                    ).data
+                    song["interactions"] = song_interactions_data
+                except um.User_Content_Interaction.DoesNotExist:
+                    song["interactions"] = None
         return data
 
 
-class SongInteractionSerializer(serializers.ModelSerializer):
-    song = serializers.SerializerMethodField()
+class ContentInteractionSerializer(serializers.ModelSerializer):
+    # content_object = serializers.SerializerMethodField()
+    # content_type = serializers.SerializerMethodField()
+    # interaction_type = serializers.SerializerMethodField()
 
     class Meta:
-        model = um.User_Song_Interaction
-        fields = []
+        model = um.User_Content_Interaction
+        fields = [
+            # "content_type",
+            # "content_object",
+            "interaction_type",
+            # "created_at",
+        ]
+        read_only_fields = ["created_at"]
+
+    def get_content_type(self, obj):
+        return obj.content_type.model
+
+    def get_content_object(self, obj):
+        if isinstance(obj.content_object, cm.Song):
+            return SongSerializer(obj.content_object, context=self.context).data
+        elif isinstance(obj.content_object, cm.Album):
+            return AlbumSerializer(obj.content_object, context=self.context).data
+        elif isinstance(obj.content_object, cm.Artist):
+            return ArtistSerializer(obj.content_object, context=self.context).data
+        return None
+
+    def validate_interaction_type(self, value):
+        allowed = [
+            "Like",
+            "Dislike",
+            "Play",
+            "Save",
+        ]
+        if value not in allowed:
+            raise serializers.ValidationError(
+                f"'{value}' is not a valid interaction type. Choose from {allowed}."
+            )
+        return value
+
+    def create(self, validated_data):
+        request = self.context.get("request")
+        if not request:
+            raise serializers.ValidationError("")
+
+        content_type = request.parser_context.get("kwargs", {}).get("content_type")
+        object_id = request.parser_context.get("kwargs", {}).get("object_id")
+        interaction_type = validated_data.get("interaction_type")
+
+        if not content_type or not object_id:
+            raise serializers.ValidationError("Missing content_type or object_id")
+
+        if not interaction_type:
+            raise serializers.ValidationError("Missing interaction_type")
+
+        instance = um.User_Content_Interaction.objects.create(
+            user=request.user,
+            content_type=content_type,
+            object_id=object_id,
+            interaction_type=interaction_type,
+        )
+        return instance
+
+    def delete(self):
+        request = self.context.get("request")
+        if not request or not request.user.is_authenticated:
+            raise serializers.ValidationError("User must be authenticated")
+
+        content_type = request.parser_context.get("kwargs", {}).get("content_type")
+        object_id = request.parser_context.get("kwargs", {}).get("object_id")
+        interaction_type = self.validated_data.get("interaction_type")
+
+        if not content_type or not object_id:
+            raise serializers.ValidationError("Missing content_type or object_id")
+
+        if not interaction_type:
+            raise serializers.ValidationError("Missing interaction_type")
+
+        deleted_count, _ = um.User_Content_Interaction.objects.filter(
+            user=request.user,
+            content_type=content_type,
+            object_id=object_id,
+            interaction_type=interaction_type,
+        ).delete()
+
+        if deleted_count == 0:
+            raise serializers.ValidationError("No matching interaction to delete")
+
+        return {"deleted": deleted_count}
 
 
-class ArtistInteractionSerializer(serializers.ModelSerializer):
-    artist = serializers.SerializerMethodField()
-
-    class Meta:
-        model = um.User_Artist_Interaction
-        fields = []
-
-
-# class PlaylistSerializer(serializers.ModelSerializer):
-#     user = UserSerializer(many=False)
-#     songs = SongSerializer(many=True)
+# class ArtistInteractionSerializer(serializers.ModelSerializer):
+#     artist = serializers.SerializerMethodField()
 
 #     class Meta:
-#         model = Playlist
-#         fields = "__all__"
+#         model = um.User_Artist_Interaction
+#         fields = []
+
+
+class PlaylistSerializer(serializers.ModelSerializer):
+    thumbnail_url = serializers.SerializerMethodField()
+    songs = serializers.SerializerMethodField()
+    # collaborator = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Playlist
+        fields = [
+            "public_id",
+            "title",
+            "description",
+            "thumbnail_url",
+            "duration",
+            "owner",
+            "created_at",
+            "last_updated",
+            "privacy",
+            "songs",
+            # "collaborator",
+        ]
+
+    def get_thumbnail_url(self, obj):
+        if obj.thumbnail_url:
+            return f"{settings.MEDIA_FULL_URL}{obj.thumbnail_url}"
+        return None
+
+    # def get_collaborator(self, obj):
+    #     user = Playlist_Collaborator.objects.filter(album=obj.id)
+    #     if artists is not None:
+    #         return [
+    #             {
+    #                 "public_id": artist.artist.public_id,
+    #                 "name": artist.artist.name,
+    #                 # "role": artist.role,
+    #                 "profile_image_url": f"{settings.MEDIA_FULL_URL}{artist.artist.profile_image_url}",
+    #             }
+    #             for artist in artists
+    #         ]
+    #     return None
+
+    def get_songs(self, obj):
+        playlist_songs = Playlist_Song.objects.filter(playlist=obj.id).order_by("order")
+
+        songs = [ps.song for ps in playlist_songs]
+        request = self.context.get("request")
+        return SongSerializer(songs, many=True, context={"request": request}).data
 
 
 # class CreatePlaylistSerializer(serializers.ModelSerializer):

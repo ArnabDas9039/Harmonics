@@ -1,5 +1,6 @@
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.contrib.contenttypes.models import ContentType
 from . import models as cm
 from analytics import models as am
 
@@ -18,8 +19,8 @@ def set_song(sender, instance, created, **kwargs):
                 instance.save(update_fields=["duration"])
         except Exception as e:
             print(f"[post_save set_song_duration] Error: {e}")
-
-        am.Song_Data.objects.create(song=instance)
+        content_type = ContentType.objects.get(app_label="content", model="song")
+        am.Content_Data.objects.create(content_type=content_type, object_id=instance.id)
 
         # features = process.extract_audio_features(instance.file_url.path)
 

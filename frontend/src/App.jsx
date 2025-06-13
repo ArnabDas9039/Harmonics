@@ -18,7 +18,7 @@ import {
 } from "./pages/Info";
 import PlayingWidget from "./components/PlayingWidget";
 import { logoutUser } from "./store/authSlice";
-import SongUploadForm from "./pages/Upload";
+// import SongUploadForm from "./pages/Upload";
 
 function Logout() {
   const dispatch = useDispatch();
@@ -65,7 +65,7 @@ function App() {
           element={isAuthorized ? <Navigate to="/profile" /> : <Login />}
         />
         <Route path="/logout" element={<Logout />} />
-        <Route path="/upload" element={<SongUploadForm />} />
+        {/* <Route path="/upload" element={<SongUploadForm />} /> */}
         <Route
           path="/register"
           element={isAuthorized ? <Navigate to="/profile" /> : <Register />}

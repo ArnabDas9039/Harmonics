@@ -10,11 +10,20 @@ urlpatterns = [
     path("song/<public_id>", views.SongView.as_view(), name="song_info"),
     path("artist/<public_id>", views.ArtistView.as_view(), name="artist_info"),
     path("album/<public_id>", views.AlbumView.as_view(), name="album_info"),
-    path("song/interact/", views.SongInteractView.as_view(), name="song_interaction"),
+    path("interact/", views.CreateInteractView.as_view(), name="song_interaction"),
     path(
-        "artist/interact/", views.ArtistInteractView.as_view(), name="song_interaction"
+        "interact/delete/", views.DeleteInteractView2.as_view(), name="song_interaction"
     ),
-    # path("playlist/<public_id>", views.PlaylistView.as_view(), name="playlist_info"),
+    path(
+        "interact/delete1/", views.DeleteInteractView.as_view(), name="song_interaction"
+    ),
+    path(
+        "interact/toggle/", views.ToggleInteractView.as_view(), name="song_interaction"
+    ),
+    # path(
+    #     "artist/interact/", views.ArtistInteractView.as_view(), name="song_interaction"
+    # ),
+    path("playlist/<public_id>", views.PlaylistView.as_view(), name="playlist_info"),
     # path(
     #     "playlist/create/",
     #     views.CreatePlaylistView.as_view(),

@@ -93,29 +93,201 @@ class AlbumView(generics.RetrieveAPIView):
         return cm.Album.objects.filter(public_id=self.kwargs["public_id"])
 
 
-class SongInteractView(generics.CreateAPIView):
-    serializer_class = apis.SongInteractionSerializer
+class CreateInteractView(generics.CreateAPIView):
+    serializer_class = apis.ContentInteractionSerializer
     permission_classes = [IsAuthenticated]
 
-    def create(self):
-        pass
+    def create(self, request, *args, **kwargs):
+        data = request.data.copy()
+        model_name = data.get("content_type")
+        object_id = data.get("object_id")
+        interaction_type = data.get("interaction_type")
+
+        if not model_name or not object_id or not interaction_type:
+            raise ValidationError(
+                {
+                    "detail": "All of content_type, object_id and interaction_type are required."
+                }
+            )
+
+        try:
+            content_type = ContentType.objects.get(
+                app_label="content", model=model_name
+            )
+            model_class = content_type.model_class()
+            content_object = model_class.objects.get(public_id=object_id)
+
+            self.kwargs["content_type"] = content_type
+            self.kwargs["object_id"] = content_object.id
+
+            serializer = self.get_serializer(
+                data={
+                    "interaction_type": interaction_type,
+                }
+            )
+
+            serializer.is_valid(raise_exception=True)
+            self.perform_create(serializer)
+
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        except ContentType.DoesNotExist:
+            raise ValidationError(
+                {"detail": f"Invalid content_type: '{model_name}' does not exist."}
+            )
+        except model_class.DoesNotExist:
+            raise ValidationError({"detail": f"No object found with id: {object_id}."})
 
 
-class ArtistInteractView(generics.CreateAPIView):
-    serializer_class = apis.ArtistInteractionSerializer
+class DeleteInteractView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def create(self):
-        pass
+    def delete(self, request, *args, **kwargs):
+        data = request.data.copy()
+        model_name = data.get("content_type")
+        object_id = data.get("object_id")
+        interaction_type = data.get("interaction_type")
+
+        if not model_name or not object_id or not interaction_type:
+            raise ValidationError(
+                {
+                    "detail": "All of content_type, object_id and interaction_type are required."
+                }
+            )
+
+        try:
+            content_type = ContentType.objects.get(
+                app_label="content", model=model_name
+            )
+            model_class = content_type.model_class()
+            content_object = model_class.objects.get(public_id=object_id)
+
+            self.kwargs["content_type"] = content_type
+            self.kwargs["object_id"] = content_object.id
+            serializer = apis.ContentInteractionSerializer(
+                data=request.data,
+                context={
+                    "request": request,
+                    "content_type": kwargs.get("content_type"),
+                    "object_id": kwargs.get("obejct_id"),
+                },
+            )
+        except ContentType.DoesNotExist:
+            raise ValidationError("")
+
+        serializer.is_valid(raise_exception=True)
+        result = serializer.delete()
+        return Response(result, status=status.HTTP_204_NO_CONTENT)
 
 
-# class PlaylistView(generics.RetrieveAPIView):
-#     serializer_class = apis.PlaylistSerializer
-#     permission_classes = [AllowAny]
-#     lookup_field = "public_id"
+class DeleteInteractView2(generics.DestroyAPIView):
+    serializer_class = apis.ContentInteractionSerializer
+    permission_classes = [IsAuthenticated]
 
-#     def get_queryset(self):
-#         return apim.Playlist.objects.filter(public_id=self.kwargs["public_id"])
+    def get_object(self):
+        user = self.request.user
+
+        data = self.request.data.copy()
+        model_name = data.get("content_type")
+        object_id = data.get("object_id")
+        interaction_type = data.get("interaction_type")
+
+        if not model_name or not object_id or not interaction_type:
+            raise ValidationError(
+                {
+                    "detail": "All of content_type, object_id and interaction_type are required."
+                }
+            )
+        # content_type = self.kwargs.get("content_type")
+        # object_id = self.kwargs.get("object_id")
+        # interaction_type = self.request.data.get("interaction_type")
+
+        try:
+            content_type = ContentType.objects.get(
+                app_label="content", model=model_name
+            )
+            model_class = content_type.model_class()
+            content_object = model_class.objects.get(public_id=object_id)
+        except ContentType.DoesNotExist:
+            raise ValidationError({"detail": "Invalid content_type."})
+
+        try:
+            return um.User_Content_Interaction.objects.get(
+                user=user,
+                content_type=content_type,
+                object_id=content_object.id,
+                interaction_type=interaction_type,
+            )
+        except um.User_Content_Interaction.DoesNotExist:
+            raise ValidationError({"detail": "Interaction not found."})
+
+
+class ToggleInteractView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        user = request.user
+        model_name = request.data.get("content_type")
+        object_id = request.data.get("object_id")
+        interaction_type = request.data.get("interaction_type")
+
+        if not model_name or not object_id or not interaction_type:
+            return Response(
+                {"detail": "Data Required"}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            content_type = ContentType.objects.get(
+                app_label="content", model=model_name
+            )
+            model_class = content_type.model_class()
+            content_object = model_class.objects.get(public_id=object_id)
+        except ContentType.DoesNotExist:
+            return Response(
+                {"detail": "Invalid content_type"}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+        obj_exists = um.User_Content_Interaction.objects.filter(
+            user=user,
+            content_type=content_type,
+            object_id=content_object.id,
+            interaction_type=interaction_type,
+        )
+
+        if obj_exists.exists():
+            obj_exists.delete()
+            return Response(
+                {"detail": "Removed", "interaction_type": interaction_type},
+                status=status.HTTP_200_OK,
+            )
+        else:
+            interaction = um.User_Content_Interaction.objects.create(
+                user=user,
+                content_type=content_type,
+                object_id=content_object.id,
+                interaction_type=interaction_type,
+            )
+            return Response(
+                {"detail": "Added", "interaction_type": interaction_type},
+                status=status.HTTP_201_CREATED,
+            )
+
+
+# class ArtistInteractView(generics.CreateAPIView):
+#     serializer_class = apis.ArtistInteractionSerializer
+#     permission_classes = [IsAuthenticated]
+
+#     def create(self):
+#         pass
+
+
+class PlaylistView(generics.RetrieveAPIView):
+    serializer_class = apis.PlaylistSerializer
+    permission_classes = [AllowAny]
+    lookup_field = "public_id"
+
+    def get_queryset(self):
+        return apim.Playlist.objects.filter(public_id=self.kwargs["public_id"])
 
 
 # class PlaylistListView(generics.ListAPIView):

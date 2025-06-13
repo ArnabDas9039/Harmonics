@@ -1,7 +1,10 @@
-# from django.db.models.signals import post_save
-# from django.dispatch import receiver
-# from .models import Song, SongFeature, UserFeed, UserLibrary, Radio
-# from django.contrib.auth.models import User
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from django.db import models
+from django.contrib.auth.models import User
+from analytics import models as alm
+from content import models as cm
+from user import models as um
 # from .process import process as process
 # from .process import learn as learn
 
@@ -28,13 +31,37 @@
 #         learn.cluster()
 
 
-# @receiver(post_save, sender=User)
-# def create_user_data(sender, instance, created, **kwargs):
+# @receiver(post_save, sender=um.User_Content_Interaction)
+# def update_interact_data(sender, instance, created, **kwargs):
 #     if created:
-#         songs = Song.objects.all()[:16]
-#         UserFeed.objects.create(user=instance)
-#         UserFeed.objects.get(user=instance).quick_picks.set(songs)
-#         UserLibrary.objects.create(user=instance)
+#         song_instance = instance.content_object
+#         if not isinstance(song_instance, cm.Song):
+#             print(f"Error: Interaction content_object is not a Song instance.")
+#             return
+#         song_data, data_created = alm.Content_Data.objects.get_or_create(
+#             song=song_instance,
+#             defaults={
+#                 # "last_updated": timezone.now()
+#             },
+#         )
+#         if instance.interaction_type == "Play":
+#             song_data.play_count = models.F("play_count") + 1
+#             alm.Song_Data.objects.filter(pk=song_data.pk).update(
+#                 play_count=models.F("play_count") + 1,
+#                 # last_updated=timezone.now()
+#             )
+#         elif instance.interaction_type == "Like":
+#             song_data.like_count = models.F("like_count") + 1
+#             alm.Song_Data.objects.filter(pk=song_data.pk).update(
+#                 like_count=models.F("like_count") + 1,
+#                 # last_updated=timezone.now()
+#             )
+#         elif instance.interaction_type == "Dislike":
+#             song_data.dislike_count = models.F("dislike_count") + 1
+#             alm.Song_Data.objects.filter(pk=song_data.pk).update(
+#                 dislike_count=models.F("dislike_count") + 1,
+#                 # last_updated=timezone.now()
+#             )
 
 
 # @receiver(post_save, sender=Radio)

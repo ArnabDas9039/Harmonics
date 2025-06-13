@@ -48,6 +48,10 @@ class Playlist_Song(models.Model):
     playlist = models.ForeignKey(Playlist, on_delete=models.CASCADE)
     order = models.PositiveIntegerField()
 
+    class Meta:
+        unique_together = ("song", "playlist")
+        ordering = ["order"]
+
 
 class Playlist_Collaborator(models.Model):
     id = models.BigAutoField(primary_key=True)
