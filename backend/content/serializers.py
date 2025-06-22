@@ -34,6 +34,7 @@ class SongSerializer(serializers.ModelSerializer):
             "title",
             "file_url",
             "thumbnail_url",
+            "lyrics_url",
             "release_date",
             "duration",
             "is_explicit",
@@ -51,6 +52,11 @@ class SongSerializer(serializers.ModelSerializer):
     def get_thumbnail_url(self, obj):
         if obj.thumbnail_url:
             return f"{settings.MEDIA_FULL_URL}{obj.thumbnail_url}"
+        return None
+
+    def get_lyrics_url(self, obj):
+        if obj.lyrics_url:
+            return f"{settings.MEDIA_FULL_URL}{obj.lyrics_url}"
         return None
 
     def get_genres(self, obj):

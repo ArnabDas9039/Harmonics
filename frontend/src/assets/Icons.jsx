@@ -86,6 +86,14 @@ export const HistoryIcon = (
 
 export const QueueIcon = <></>;
 
+export const AddIcon = (
+  <path d="M450-450H220v-60h230v-230h60v230h230v60H510v230h-60v-230Z" />
+);
+
+export const ExplicitIcon = (
+  <path d="M370-290h220v-60H430v-100h160v-60H430v-100h160v-60H370v380ZM212.31-140Q182-140 161-161q-21-21-21-51.31v-535.38Q140-778 161-799q21-21 51.31-21h535.38Q778-820 799-799q21 21 21 51.31v535.38Q820-182 799-161q-21 21-51.31 21H212.31Z" />
+);
+
 // Create a reusable SVG component for consistent styling
 export const IconSVG = ({ children, onClick, className }) => (
   <svg

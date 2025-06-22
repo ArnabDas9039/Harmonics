@@ -64,6 +64,13 @@ from user import models as um
 #             )
 
 
+@receiver(post_save, sender=User)
+def create_user_data(sender, instance, created, **kwargs):
+    if created:
+        # songs = Song.objects.all()[:16]
+        um.User_Data.objects.create(user=instance)
+
+
 # @receiver(post_save, sender=Radio)
 # def create_user_recommend(sender, instance, created, **kwargs):
 #     print(instance.seed)

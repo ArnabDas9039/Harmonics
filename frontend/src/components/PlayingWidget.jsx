@@ -1,4 +1,5 @@
 import { useContext, useEffect, useRef, useState } from "react";
+import parseLrc from "lrc-parser";
 import "../styles/PlayingWidget.css";
 import "../styles/General.css";
 import "../styles/Feed.css";
@@ -30,17 +31,93 @@ import {
   FilledLikeIcon,
   CheckPlaylistIcon,
 } from "../assets/Icons";
+import PlaylistCheck from "./PlaylistCheck";
 
 function PlayingWidget() {
   const audioRef = useRef(null);
+
+  const { isPlaying, playing, queue } = useSelector((state) => state.play);
+  const dispatch = useDispatch();
+
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
-  const { isPlaying, playing, queue } = useSelector((state) => state.play);
-  const [showPlayingPage, setShowPlayingPage] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [repeat, setRepeat] = useState(false);
-  const [timer, setTimer] = useState(null);
-  const dispatch = useDispatch();
+  const hasLoggedPlayRef = useRef(false);
+  const thresholdRef = useRef(null);
+
+  const [showPlayingPage, setShowPlayingPage] = useState(false);
+
+  const [showPlaylistCheck, setShowPlaylistCheck] = useState(false);
+
+  const lyricsContainerRef = useRef(null);
+  const [lrcText, setLrcText] = useState("");
+  const [lyrics, setLyrics] = useState([]);
+  const [currentLyricIndex, setCurrentLyricIndex] = useState(0);
+
+  useEffect(() => {
+    hasLoggedPlayRef.current = false;
+    thresholdRef.current = null;
+    lyricsContainerRef.current = null;
+  }, [playing.public_id]);
+
+  const getLyrics = async () => {
+    try {
+      const response = await api.get(playing.lyrics_url);
+      // console.log(response.data);
+      setLrcText(response.data);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  useEffect(() => {
+    getLyrics();
+  }, [playing]);
+
+  useEffect(() => {
+    if (!lrcText) return;
+    try {
+      const parsed = parseLrc(lrcText)?.scripts || [];
+      if (Array.isArray(parsed)) {
+        setLyrics(parsed);
+      } else {
+        console.error("Parsed lyrics is not an array:", parsed);
+        setLyrics([]);
+      }
+    } catch (error) {
+      console.error("Error parsing lyrics:", error);
+      setLyrics([]);
+    }
+  }, [lrcText]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (!audioRef.current) return;
+      const currentTime = audioRef.current.currentTime;
+      const index = lyrics.findIndex((line, i) =>
+        i === lyrics.length - 1 ? true : currentTime < lyrics[i + 1].start
+      );
+
+      if (index !== -1 && index !== currentLyricIndex) {
+        // console.log(index);
+        setCurrentLyricIndex(index);
+      }
+    }, 200);
+
+    return () => clearInterval(interval);
+  }, [lyrics, currentLyricIndex]);
+
+  useEffect(() => {
+    const container = lyricsContainerRef.current;
+    const activeLine = container?.querySelector(".active");
+    if (activeLine && container) {
+      container.scrollTo({
+        top: activeLine.offsetTop - container.clientHeight / 2 + 20,
+        behavior: "smooth",
+      });
+    }
+  }, [currentLyricIndex]);
 
   const handlePlay = () => dispatch(setIsPlaying(true));
   const handlePause = () => dispatch(setIsPlaying(false));
@@ -81,38 +158,15 @@ function PlayingWidget() {
           const result = await api.get(`api/radio/${response.data.id}`);
           dispatch(setQueue(result.data.results));
         } catch (err) {
-          // alert(err);
+          console.log(err);
         }
       }
     } catch (err) {
-      // alert(err);
+      console.log(err);
     } finally {
       setIsLoading(false);
     }
   };
-
-  useEffect(() => {
-    if (playing) {
-      if (queue.length === 0) {
-        // fetchRadio();
-      }
-      if (isPlaying) {
-        const newTimer = setTimeout(() => {}, 10000);
-        setTimer(newTimer);
-      } else {
-        if (timer) {
-          clearTimeout(timer);
-          setTimer(null);
-        }
-      }
-
-      return () => {
-        if (timer) {
-          clearTimeout(timer);
-        }
-      };
-    }
-  }, [playing]);
 
   const handleSongEnd = () => {
     if (repeat === true) {
@@ -183,33 +237,26 @@ function PlayingWidget() {
     }
   };
   const handleSave = async () => {
-    try {
-      const response = await api.post("api/interact/", {
-        content_type: "song",
-        object_id: playing.public_id,
-        interaction_type: "Save",
-      });
-      if (response.status === 201) {
-        const currentInteractions = playing.interactions || [];
+    setShowPlaylistCheck(true);
+    // try {
+    //   const response = await api.post("api/interact/", {
+    //     content_type: "song",
+    //     object_id: playing.public_id,
+    //     interaction_type: "Save",
+    //   });
+    //   if (response.status === 201) {
+    //     const currentInteractions = playing.interactions || [];
 
-        const updatedPlaying = {
-          ...playing,
-          interactions: [...currentInteractions, response.data],
-        };
+    //     const updatedPlaying = {
+    //       ...playing,
+    //       interactions: [...currentInteractions, response.data],
+    //     };
 
-        dispatch(setPlaying(updatedPlaying));
-      }
-    } catch (err) {
-      alert(err);
-    }
-  };
-
-  const handleHistory = async () => {
-    try {
-      await api.post("api/history/post/", { song: playing.public_id });
-    } catch (error) {
-      alert(error);
-    }
+    //     dispatch(setPlaying(updatedPlaying));
+    //   }
+    // } catch (err) {
+    //   alert(err);
+    // }
   };
 
   const handlePlayPause = () => {
@@ -230,6 +277,26 @@ function PlayingWidget() {
 
   const handleTimeUpdate = () => {
     setCurrentTime(audioRef.current.currentTime);
+
+    if (!hasLoggedPlayRef.current && duration && !isNaN(duration)) {
+      const threshold = thresholdRef.current || Math.min(30, duration * 0.3);
+      thresholdRef.current = threshold;
+
+      if (audioRef.current.currentTime >= threshold) {
+        try {
+          const response = api.post("/api/interact/", {
+            content_type: "song",
+            object_id: playing.public_id,
+            interaction_type: "Play",
+          });
+          if ((response.status = 201)) {
+            hasLoggedPlayRef.current = true;
+          }
+        } catch (err) {
+          console.error("Failed to log history:", err);
+        }
+      }
+    }
   };
 
   const handleLoadedMetadata = () => {
@@ -240,6 +307,12 @@ function PlayingWidget() {
     const seekTime = (event.target.value / 100) * duration;
     audioRef.current.currentTime = seekTime;
     setCurrentTime(seekTime);
+  };
+
+  const handleLyricJump = (line) => {
+    console.log(line);
+    const jumpTime = line.start;
+    audioRef.current.currentTime = jumpTime;
   };
 
   if (!playing) {
@@ -254,6 +327,12 @@ function PlayingWidget() {
     <>
       {playing && (
         <div>
+          {showPlaylistCheck && (
+            <PlaylistCheck
+              onClose={() => setShowPlaylistCheck(false)}
+              currentSong={playing}
+            />
+          )}
           <audio
             ref={audioRef}
             src={playing && playing.file_url}
@@ -385,6 +464,21 @@ function PlayingWidget() {
               </div>
               <div className="full-right-section">
                 <div className="tab">Up Next</div>
+                {lyrics && (
+                  <div className="lyrics-container" ref={lyricsContainerRef}>
+                    {lyrics.map((line, index) => (
+                      <div
+                        key={index}
+                        className={`lyric-line ${
+                          index === currentLyricIndex ? "active" : ""
+                        }`}
+                        onClick={() => handleLyricJump(line)}
+                      >
+                        {line.text}
+                      </div>
+                    ))}
+                  </div>
+                )}
                 <div className="song-queue-list queue-thumbnails">
                   {queue?.map((song) => (
                     <GridThumbnail item={song} key={song.public_id} />
@@ -497,7 +591,15 @@ function PlayingWidget() {
                     </IconSVG>
                   </button>
                 </div>
-                <div className="controls">
+                <div className="controls play-pause-controls compact">
+                  <button
+                    className="controls-button play-pause"
+                    onClick={handlePlayButton}
+                  >
+                    <IconSVG>{isPlaying ? PauseIcon : PlayIcon}</IconSVG>
+                  </button>
+                </div>
+                <div className="controls arrow">
                   <button
                     className="controls-button"
                     onClick={handlearrowbutton}

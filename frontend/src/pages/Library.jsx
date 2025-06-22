@@ -2,12 +2,7 @@ import Header from "../components/Header";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import api from "../api";
-import {
-  AlbumThumbnail,
-  ArtistThumbnail,
-  MediumThumbnail,
-  PlaylistThumbnail,
-} from "../components/Thumbnails";
+import { MediumThumbnail } from "../components/Thumbnails";
 
 function Library() {
   const [feeds, setFeeds] = useState([]);
@@ -19,13 +14,16 @@ function Library() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [HistoryResponse, LibraryResponse] = await Promise.all([
-          api.get("/api/history/?limit=10"),
-          api.get("/api/library/"),
-        ]);
+        const [HistoryResponse, PlaylistResponse, LibraryResponse] =
+          await Promise.all([
+            api.get("/api/history/?limit=10"),
+            api.get("/api/playlist/list/"),
+            api.get("/api/library/"),
+          ]);
         setFeeds(HistoryResponse.data.results);
-        setLibrary(LibraryResponse.data.results);
-        // setmyPlaylists(PlaylistResponse.data);
+        setmyPlaylists(PlaylistResponse.data);
+        setLibrary(LibraryResponse.data);
+
         setIsLoading(false);
       } catch (err) {
         alert(err);
@@ -51,8 +49,12 @@ function Library() {
           </div>
         </div>
         <div className="medium-thumbnails">
-          {feeds.map((song) => (
-            <MediumThumbnail item={song.content_object} key={song.created_at} />
+          {feeds?.map((item) => (
+            <MediumThumbnail
+              item={item.content_object}
+              content_type={item.content_type}
+              key={item.created_at}
+            />
           ))}
         </div>
       </>
@@ -63,9 +65,28 @@ function Library() {
           </div>
         </div>
         <div className="medium-thumbnails">
-          {/* {myPlaylists.map((song) => (
-            <PlaylistThumbnail item={song} key={song.id} />
-          ))} */}
+          {myPlaylists?.map((item) => (
+            <MediumThumbnail
+              item={item}
+              content_type={"playlist"}
+              key={item.public_id}
+            />
+          ))}
+        </div>
+      </>
+      <>
+        <div className="heading-section">
+          <div className="heading">
+            <b>Saved</b>
+          </div>
+        </div>
+        <div className="medium-thumbnails">
+          {library.map((item) => (
+            <MediumThumbnail
+              item={item.content_object}
+              content_type={item.content_type}
+            />
+          ))}
         </div>
       </>
       <>

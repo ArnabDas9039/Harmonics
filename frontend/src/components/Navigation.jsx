@@ -8,11 +8,15 @@ import {
   FilledHomeIcon,
   FilledExploreIcon,
   FilledLibraryIcon,
+  AddIcon,
 } from "../assets/Icons";
+import { useSelector } from "react-redux";
 
-function Navigation() {
+function Navigation({ onNewPlaylist }) {
   const location = useLocation();
   const currentPath = location.pathname;
+  const { isAuthorized, loading } = useSelector((state) => state.auth);
+
   return (
     <>
       <div className="navigation destination">
@@ -56,6 +60,19 @@ function Navigation() {
             <div className="icon-label">Library</div>
           </div>
         </Link>
+        {isAuthorized ? (
+          <div className="new-playlist-btn" onClick={onNewPlaylist}>
+            <div className="icon">
+              <IconSVG>{AddIcon}</IconSVG>
+            </div>
+            <div className="icon-label">New Playlist</div>
+          </div>
+        ) : (
+          <div className="new-playlist-btn">
+            <div className="icon"></div>
+            <div className="icon-label">Log In</div>
+          </div>
+        )}
       </div>
       <Outlet />
     </>
