@@ -69,6 +69,10 @@ class Song(models.Model):
         blank=False,
         default="images/song_thumbnail/default_image.png",
     )
+    lyrics_url = models.FileField(
+        upload_to="lyrics",
+        blank=True,
+    )
     release_date = models.DateField()
     duration = models.DurationField()
     is_explicit = models.BooleanField(default=False)

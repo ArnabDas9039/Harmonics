@@ -47,6 +47,7 @@ body {
 @media (max-width: 600px) {
     .body {
         padding-left: 0px;
+        padding-bottom: 160px;
     }
 
     .logo-section {

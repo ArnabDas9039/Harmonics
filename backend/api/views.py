@@ -18,15 +18,9 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.exceptions import ValidationError
 from django.contrib.contenttypes.models import ContentType
 
-# from .models import *
+from django.db.models import Exists, OuterRef, Q
+
 from .mypaginations import MyLimitOffsetPagination
-# from django.shortcuts import get_object_or_404
-# import random
-# import logging
-# from .process import learn
-
-# logger = logging.getLogger(__name__)
-
 
 # Create your views here.
 
@@ -290,51 +284,66 @@ class PlaylistView(generics.RetrieveAPIView):
         return apim.Playlist.objects.filter(public_id=self.kwargs["public_id"])
 
 
-# class PlaylistListView(generics.ListAPIView):
-#     serializer_class = apis.PlaylistSerializer
-#     permission_classes = [IsAuthenticated]
+class PlaylistListView(generics.ListAPIView):
+    serializer_class = apis.PlaylistSerializer
+    permission_classes = [IsAuthenticated]
 
-#     def get_queryset(self):
-#         return apim.Playlist.objects.filter(user=self.request.user)
+    def get_queryset(self):
+        song_public_id = self.request.query_params.get("song")
+
+        playlists = apim.Playlist.objects.filter(owner=self.request.user)
+        if song_public_id:
+            try:
+                song = cm.Song.objects.get(public_id=song_public_id)
+                playlists = playlists.annotate(
+                    is_added=Exists(
+                        apim.Playlist_Song.objects.filter(
+                            playlist=OuterRef("pk"), song=song
+                        )
+                    )
+                )
+            except cm.Song.DoesNotExist:
+                pass
+
+        return playlists
 
 
-# class CreatePlaylistView(generics.CreateAPIView):
-#     serializer_class = apis.PlaylistSerializer
-#     permission_classes = [IsAuthenticated]
-
-#     def create(self, request, *args, **kwargs):
-#         # data=self.request.
-#         pass
+class CreatePlaylistView(generics.CreateAPIView):
+    serializer_class = apis.PlaylistSerializer
+    permission_classes = [IsAuthenticated]
+    queryset = apim.Playlist.objects.all()
 
 
-# class UpdatePlaylistView(generics.UpdateAPIView):
-#     serializer_class = apis.PlaylistSerializer
-#     permission_classes = [IsAuthenticated]
+class UpdatePlaylistView(generics.UpdateAPIView):
+    serializer_class = apis.PlaylistSerializer
+    permission_classes = [IsAuthenticated]
+    lookup_field = "public_id"
 
-#     def put(self, request, id=None):
-#         try:
-#             playlist = self.get_object()
-#             song_id = request.data.get("song_id")
-#             if not song_id:
-#                 return Response(
-#                     {"detail": "Song ID not provided."},
-#                     status=status.HTTP_400_BAD_REQUEST,
-#                 )
+    def get_queryset(self):
+        return apim.Playlist.objects.filter()
 
-#             try:
-#                 song = Song.objects.get(id=song_id)
-#             except Song.DoesNotExist:
-#                 return Response(
-#                     {"detail": "Song not found."}, status=status.HTTP_404_NOT_FOUND
-#                 )
-#             playlist.songs.add(song)
-#             playlist.save()
-#             serializer = self.serializer_class(playlist)
-#             return Response(serializer.data, status=status.HTTP_200_OK)
-#         except Playlist.DoesNotExist:
-#             return Response(
-#                 {"detail": "Playlist not found."}, status=status.HTTP_404_NOT_FOUND
-#             )
+
+class DestroyPlaylistView(generics.DestroyAPIView):
+    queryset = apim.Playlist.objects.all()
+    serializer_class = apis.PlaylistSerializer
+    permission_classes = [IsAuthenticated]
+    lookup_field = "public_id"
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if instance.owner != request.user:
+            return Response(
+                {
+                    "detail": "You do not have permission to delete this playlist as you are not the owner."
+                },
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        instance.delete()
+        return Response(
+            {"detail": "Playlist deleted successfully."},
+            status=status.HTTP_204_NO_CONTENT,
+        )
 
 
 # class UserView(generics.RetrieveAPIView):
@@ -599,6 +608,37 @@ class UserView(generics.RetrieveAPIView):
         return um.User_Data.objects.get(user=self.request.user)
 
 
-class CreateUserView(generics.RetrieveAPIView):
-    serializer_class = us.UserSerializer
-    permission_classes = [IsAuthenticated]
+class CreateUserView(generics.CreateAPIView):
+    serializer_class = us.CreateUserSerializer
+    permission_classes = [AllowAny]
+
+
+class SearchView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        query = request.query_params.get("q")
+
+        if not query:
+            return Response(
+                {"detail": "Empty search query"}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+        songs = cm.Song.objects.filter(Q(title__icontains=query))[:10]
+        # artists = cm.Artist.objects.filter(Q(title__icontains=query))[:10]
+        albums = cm.Album.objects.filter(Q(title__icontains=query))[:10]
+        # playlists = apim.Playlist.objects.filter(Q(title__icontains=query))[:10]
+
+        return Response(
+            {
+                "query": query,
+                "songs": apis.SongSerializer(
+                    songs, many=True, context={"request": request}
+                ).data,
+                # "artists": apis.ArtistSerializer(artists, many=True, context={"request": request}).data,
+                "albums": apis.AlbumSerializer(
+                    albums, many=True, context={"request": request}
+                ).data,
+                # "playlists": apis.PlaylistSerializer(songs, many=True, context={"request": request}).data,
+            }
+        )

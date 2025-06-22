@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 import "../styles/Header.css";
 import { useSelector } from "react-redux";
 import { useEffect, useState } from "react";
@@ -8,7 +8,13 @@ import { IconSVG, SearchIcon } from "../assets/Icons";
 function Header(props) {
   const { isAuthorized, username } = useSelector((state) => state.auth);
   const [profile, setProfile] = useState({});
+  const [query, setQuery] = useState("");
+  const navigate = useNavigate();
 
+  const handleSearch = async (e) => {
+    e.preventDefault();
+    navigate(`/search/?q=${query}`);
+  };
   useEffect(() => {
     if (isAuthorized) {
       api
@@ -28,12 +34,24 @@ function Header(props) {
           <b>{props.destination}</b>
         </div>
       </div>
+      <div className="search-section">
+        <input
+          type="text"
+          className="search-bar"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Search"
+        />
+        <button className="search" onClick={handleSearch}>
+          <IconSVG>{SearchIcon}</IconSVG>
+        </button>
+      </div>
       <div className="right-section">
-        <div className="search">
+        {/* <div className="search">
           <button className="icon-button">
             <IconSVG>{SearchIcon}</IconSVG>
           </button>
-        </div>
+        </div> */}
         {isAuthorized ? (
           <Link to={"/profile"}>
             <div className="icon profile-icon">

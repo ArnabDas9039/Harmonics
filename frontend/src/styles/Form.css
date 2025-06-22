@@ -13,7 +13,7 @@
   width: 100%;
   padding: 10px;
   margin: 10px 0;
-  border: 1px solid #ccc;
+  border: 1px solid;
   border-radius: 10px;
   box-sizing: border-box;
 }
@@ -22,14 +22,14 @@
   width: 100%;
   padding: 10px;
   margin: 20px 0;
-  background-color: var(--md-sys-color-primary);
-  color: var(--md-sys-color-on-primary);
+  background-color: var(--md-sys-color-surface-container);
+  color: var(--md-sys-color-on-surface-variant);
   border: none;
   border-radius: 10px;
   cursor: pointer;
 }
 
 .form-button:hover {
-  background-color: var(--md-sys-color-primary-container);
-  color: var(--md-sys-color-on-primary-container);
+  background-color: var(--md-sys-color-primary);
+  color: var(--md-sys-color-on-primary);
 }

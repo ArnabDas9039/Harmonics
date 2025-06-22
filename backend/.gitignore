@@ -1,7 +1,6 @@
 .env
 __pycache__
-migrations
-media
+media/api/
 static
 db.sqlite3
 .env

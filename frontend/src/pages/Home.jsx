@@ -2,20 +2,14 @@ import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import api from "../api";
 import "@material/web/all.js";
-import {
-  GridThumbnail,
-  ArtistThumbnail,
-  MediumThumbnail,
-  PlaylistThumbnail,
-  AlbumThumbnail,
-} from "../components/Thumbnails";
+import { MediumThumbnail } from "../components/Thumbnails";
 import "../styles/Feed.css";
 import Header from "../components/Header";
 
 function Filter_chip(props) {
   return (
-    <div className="chips">
-      <button className="chips-button">{props.name}</button>
+    <div className="filter-chips">
+      <button className="filter-chips-button">{props.name}</button>
     </div>
   );
 }
@@ -45,7 +39,7 @@ function Home() {
       if (isAuthorized) {
         try {
           const UserResponse = await api.get("/api/feed/");
-          console.log(UserResponse.data);
+          // console.log(UserResponse.data);
           setUserFeed(UserResponse.data);
           setIsLoading(false);
         } catch (err) {
@@ -78,17 +72,11 @@ function Home() {
             </div>
             <div className="medium-thumbnails">
               {feed.items.map((item) => (
-                <div key={item.created_at}>
-                  {item.content_type === "song" && (
-                    <MediumThumbnail item={item.content_object} />
-                  )}
-                  {item.content_type === "album" && (
-                    <AlbumThumbnail item={item.content_object} />
-                  )}
-                  {item.content_type === "artist" && (
-                    <ArtistThumbnail item={item.content_object} />
-                  )}
-                </div>
+                <MediumThumbnail
+                  item={item.content_object}
+                  content_type={item.content_type}
+                  key={item.created_at}
+                />
               ))}
             </div>
           </>

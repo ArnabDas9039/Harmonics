@@ -1,100 +1,148 @@
-.info{
+.info-page {
     display: flex;
     padding: 20px;
 }
-.artist-info{
+
+.options {
+    width: 240px;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    padding: 5px 0;
+}
+
+.chips {
+    display: inline-block;
+    margin: 8px;
+}
+
+.chips-button {
+    height: 32px;
+    background-color: var(--md-sys-color-surface-container-low);
+    border-color: var(--md-sys-color-outline);
+    color: var(--md-sys-color-on-surface-container);
+    border-width: 1px;
+    border-radius: 16px;
+    border-style: solid;
+    padding: 0 16px 0 16px;
+    font-size: 14px;
+}
+
+.artist-info {
     display: flex;
     flex-direction: column;
     padding: 20px;
 }
-.large-thumbnail{
-    height: 400px;
+
+.large-thumbnail {
+    max-height: 560px;
     width: 100%;
     padding: 10px;
 }
-.large-artist-thumbnail{
+
+.large-artist-thumbnail {
     height: 500px;
     width: 100%;
 }
-.large-thumbnail-image{
+
+.large-thumbnail-image {
     height: inherit;
     object-fit: contain;
     border-radius: 20px;
 }
-.info-section{
+
+.info-page .info-section {
     flex: 1;
-    padding: 10px;
+    padding: 10px 20px;
+    max-width: 400px;
 }
-.song-name{
-    padding: 0px 10px;
+
+.song-name {
     font-size: 36px;
     font-weight: bolder;
 }
-.song-name{
-    padding: 0px 10px;
-    font-size: 36px;
-    font-weight: bolder;
-}
-.artist-item-name{
+
+.artist-item-info {
+    flex: 1;
     padding: 0px 10px;
 }
-.options{
-    display: flex;
-    padding: 10px;
+
+.artist-item-info .role {
+    font-size: 14px;
 }
-.artist-item{
-    padding: 10px;
+
+.artist-item {
+    padding: 6px 10px;
     display: flex;
     align-items: center;
 }
-.artist-name{
+
+.artist-name {
     padding: 0px 10px;
     font-size: 36px;
     font-weight: bolder;
 }
-.artist-item-thumbnail{
+
+.artist-item-thumbnail {
     height: 100%;
 }
-.artist-item-image{
+
+.artist-item-image {
     height: 80px;
     width: 80px;
     border-radius: 50%;
     object-fit: cover;
 }
-.artist-item a{
+
+.artist-item a,
+.album-item a {
     text-decoration: none;
     color: inherit;
 }
-.artist-item a:hover{
+
+.artist-item a:hover,
+.album-item a:hover {
     text-decoration: underline;
     color: inherit;
 }
-.song-item{
-    padding: 10px;
+
+.song-item {
+    padding: 6px 10px;
     display: flex;
     align-items: center;
 }
-.song-item-thumbnail{
+
+.song-item .order {
+    width: 20px;
+
+}
+
+.song-item-thumbnail {
     height: 100%;
 }
-.song-item-image{
+
+.song-item-image {
     height: 80px;
     width: 80px;
     border-radius: 10%;
     object-fit: cover;
 }
-.song-item a{
+
+.song-item a {
     text-decoration: none;
     color: inherit;
 }
-.song-item a:hover{
+
+.song-item a:hover {
     text-decoration: underline;
     color: inherit;
 }
-.song-item-thumbnail-section{
+
+.song-item-thumbnail-section {
     position: relative;
 }
-.song-item-thumbnail-section .overlay{
+
+.song-item-thumbnail-section .overlay {
     background-color: rgba(0, 0, 0, 0.3);
     position: absolute;
     height: 100%;
@@ -104,10 +152,12 @@
     top: 0;
     opacity: 0;
 }
-.song-item-thumbnail-section:hover .overlay{
+
+.song-item-thumbnail-section:hover .overlay {
     opacity: 1;
 }
-.overlay .play-pause{
+
+.overlay .play-pause {
     --overlay-width: 40px;
     --overlay-height: 40px;
     height: var(--overlay-height);
@@ -116,6 +166,53 @@
     left: calc(50% - var(--overlay-width)/2);
     top: calc(50% - var(--overlay-height)/2);
 }
-.song-item-name{
+
+.song-item .title-section {
+    flex: 1;
+}
+
+.song-item .title-info {
+    font-size: 14px;
+}
+
+.song-item-name {
     padding: 20px;
+}
+
+@media (min-width: 1200px) {}
+
+@media (min-width: 600px) and (max-width: 1200px) {}
+
+@media (max-width: 600px) {
+    .info-page {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .info-page .info-section {
+        padding: 10px 0px;
+        width: 100%;
+    }
+
+    .info-page .song-item {
+        padding: 6px 0px;
+    }
+
+    .info-page .song-name,
+    .title-desc {
+        text-align: center;
+    }
+
+    .info-page .options {
+        width: 100%;
+    }
+
+    .large-thumbnail {
+        max-height: 300px;
+    }
+
+    .large-thumbnail-image {
+        height: 100%;
+    }
 }

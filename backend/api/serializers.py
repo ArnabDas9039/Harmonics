@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.utils.dateparse import parse_duration
 from django.contrib.auth.models import User
 from django.db import models, transaction
 from django.contrib.contenttypes.models import ContentType
@@ -130,17 +131,10 @@ class AlbumSerializer(serializers.ModelSerializer):
 
 
 class ContentInteractionSerializer(serializers.ModelSerializer):
-    # content_object = serializers.SerializerMethodField()
-    # content_type = serializers.SerializerMethodField()
-    # interaction_type = serializers.SerializerMethodField()
-
     class Meta:
         model = um.User_Content_Interaction
         fields = [
-            # "content_type",
-            # "content_object",
             "interaction_type",
-            # "created_at",
         ]
         read_only_fields = ["created_at"]
 
@@ -220,67 +214,191 @@ class ContentInteractionSerializer(serializers.ModelSerializer):
         return {"deleted": deleted_count}
 
 
-# class ArtistInteractionSerializer(serializers.ModelSerializer):
-#     artist = serializers.SerializerMethodField()
-
-#     class Meta:
-#         model = um.User_Artist_Interaction
-#         fields = []
-
-
-class PlaylistSerializer(serializers.ModelSerializer):
-    thumbnail_url = serializers.SerializerMethodField()
-    songs = serializers.SerializerMethodField()
+class PlaylistSerializer(serializers.Serializer):
+    public_id = serializers.CharField(read_only=True)
+    owner = serializers.SerializerMethodField(read_only=True)
     # collaborator = serializers.SerializerMethodField()
 
-    class Meta:
-        model = Playlist
-        fields = [
-            "public_id",
-            "title",
-            "description",
-            "thumbnail_url",
-            "duration",
-            "owner",
-            "created_at",
-            "last_updated",
-            "privacy",
-            "songs",
-            # "collaborator",
-        ]
+    def to_representation(self, instance):
+        rep = super().to_representation(instance)
+        request = self.context.get("request")
+
+        playlist_songs = (
+            Playlist_Song.objects.filter(playlist=instance.id)
+            .select_related("song")
+            .order_by("order")
+        )
+        songs_with_order = []
+        song_serializer = SongSerializer(context={"request": request})
+
+        for playlist_song in playlist_songs:
+            song_data = song_serializer.to_representation(playlist_song.song)
+            song_data["order"] = playlist_song.order
+            songs_with_order.append(song_data)
+
+        rep["songs"] = songs_with_order
+        return rep
 
     def get_thumbnail_url(self, obj):
         if obj.thumbnail_url:
             return f"{settings.MEDIA_FULL_URL}{obj.thumbnail_url}"
         return None
 
-    # def get_collaborator(self, obj):
-    #     user = Playlist_Collaborator.objects.filter(album=obj.id)
-    #     if artists is not None:
-    #         return [
-    #             {
-    #                 "public_id": artist.artist.public_id,
-    #                 "name": artist.artist.name,
-    #                 # "role": artist.role,
-    #                 "profile_image_url": f"{settings.MEDIA_FULL_URL}{artist.artist.profile_image_url}",
-    #             }
-    #             for artist in artists
-    #         ]
-    #     return None
+    def get_owner(self, obj):
+        return obj.owner.username
 
-    def get_songs(self, obj):
-        playlist_songs = Playlist_Song.objects.filter(playlist=obj.id).order_by("order")
+    def get_collaborator(self, obj):
+        users = Playlist_Collaborator.objects.filter(playlist=obj.id)
+        if users is not None:
+            return [
+                {
+                    "username": user.user.username,
+                    "profile_image_url": f"{settings.MEDIA_FULL_URL}{user.user.profile_image_url}",
+                }
+                for user in users
+            ]
+        return None
 
-        songs = [ps.song for ps in playlist_songs]
+    title = serializers.CharField(max_length=255)
+    description = serializers.CharField()
+    thumbnail_url = serializers.ImageField(required=False)
+    duration = serializers.CharField(required=False)
+    created_at = serializers.DateTimeField(required=False)
+    last_updated = serializers.DateTimeField(required=False)
+    privacy = serializers.CharField(max_length=10)
+    songs = serializers.CharField(required=False, write_only=True)
+    is_added = serializers.BooleanField(read_only=True, default=False)
+
+    def validate_duration(self, value):
+        data = parse_duration(value)
+        if data is None:
+            raise serializers.ValidationError("Invalid duration format.")
+        return data
+
+    def validate_songs(self, value):
+        try:
+            data = json.loads(value)
+            if not isinstance(data, list):
+                raise serializers.ValidationError("Expected a list of song entries.")
+            for entry in data:
+                if not isinstance(entry, dict):
+                    raise serializers.ValidationError("Each song must be a dictionary.")
+                if "public_id" not in entry:
+                    raise serializers.ValidationError(
+                        "Each song must include 'public_id'."
+                    )
+                order = entry.get("order")
+                if order is not None and not isinstance(order, int):
+                    raise serializers.ValidationError("Order must be an integer.")
+            return data
+        except json.JSONDecodeError:
+            raise serializers.ValidationError("Invalid JSON format for songs.")
+
+    def create(self, validated_data):
         request = self.context.get("request")
-        return SongSerializer(songs, many=True, context={"request": request}).data
+        with transaction.atomic():
+            songs = validated_data.pop("songs", None)
+            thumbnail = validated_data.pop("thumbnail_url", None)
 
+            playlist = Playlist.objects.create(
+                title=validated_data["title"],
+                description=validated_data["description"],
+                thumbnail_url=thumbnail,
+                duration=validated_data["duration"],
+                owner=request.user,
+                privacy=validated_data["privacy"],
+            )
 
-# class CreatePlaylistSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Playlist
-#         fields = ["songs"]
-#         read_only_fields = ["id", "user", "name"]
+            if songs:
+                for song_data in songs:
+                    public_id = song_data.get("public_id")
+                    order = song_data.get("order")
+                    try:
+                        song = cm.Song.objects.get(public_id=public_id)
+                    except cm.Song.DoesNotExist:
+                        raise serializers.ValidationError(
+                            {
+                                "song_ids": f"Song with public_id '{public_id}' does not exist."
+                            }
+                        )
+
+                    if Playlist_Song.objects.filter(
+                        playlist=playlist, song=song
+                    ).exists():
+                        raise serializers.ValidationError(
+                            "This song already exists in the album."
+                        )
+
+                    if order is None:
+                        last_index = (
+                            Playlist_Song.objects.filter(playlist=playlist).aggregate(
+                                max_order=models.Max("order")
+                            )["max_order"]
+                            or 0
+                        )
+                        order = last_index + 1
+
+                    if Playlist_Song.objects.filter(
+                        playlist=playlist, order=order
+                    ).exists():
+                        raise serializers.ValidationError(
+                            f"A song already exists at {order} in the playlist."
+                        )
+
+                    Playlist_Song.objects.create(
+                        song=song, playlist=playlist, order=order
+                    )
+        return playlist
+
+    def update(self, instance, validated_data):
+        with transaction.atomic():
+            instance.title = validated_data.get("title", instance.title)
+            instance.description = validated_data.get(
+                "description", instance.description
+            )
+
+            new_thumbnail_url = validated_data.get("thumbnail_url")
+            if new_thumbnail_url is not None:
+                instance.thumbnail_url = new_thumbnail_url
+
+            # instance.last_updated = timezone.now()
+            instance.privacy = validated_data.get("privacy", instance.privacy)
+
+            instance.save()
+
+            if "songs" in validated_data:
+                songs_data = validated_data.get("songs")
+                Playlist_Song.objects.filter(playlist=instance).delete()
+
+                if songs_data:
+                    for song_entry in songs_data:
+                        public_id = song_entry.get("public_id")
+                        order = song_entry.get("order")
+                        try:
+                            song = cm.Song.objects.get(public_id=public_id)
+
+                            if order is None:
+                                last_song_in_playlist = Playlist_Song.objects.filter(
+                                    playlist=instance
+                                ).aggregate(max_order=models.Max("order"))
+                                order = (last_song_in_playlist["max_order"] or 0) + 1
+                            elif Playlist_Song.objects.filter(
+                                playlist=instance, order=order
+                            ).exists():
+                                raise serializers.ValidationError(
+                                    f"Cannot update: a song already exists at order {order} in playlist '{instance.title}'."
+                                )
+                            Playlist_Song.objects.create(
+                                song=song, playlist=instance, order=order
+                            )
+                        except cm.Song.DoesNotExist:
+                            raise serializers.ValidationError(
+                                {
+                                    "songs": f"Song with public_id '{public_id}' does not exist."
+                                }
+                            )
+
+            return instance
 
 
 class LibrarySerializer(serializers.ModelSerializer):
@@ -436,6 +554,8 @@ class UserFeedSerializer(serializers.ModelSerializer):
             return AlbumSerializer(obj.content_object, context=self.context).data
         elif isinstance(obj.content_object, cm.Artist):
             return ArtistSerializer(obj.content_object, context=self.context).data
+        elif isinstance(obj.content_object, Playlist):
+            return PlaylistSerializer(obj.content_object, context=self.context).data
         return None
 
 
@@ -477,5 +597,3 @@ class UserFeedSerializer(serializers.ModelSerializer):
 #         model = Room
 #         fields = "__all__"
 #         read_only_fields = ["host", "room_id"]
-
-# [{'group': 'Recommended', 'items': [{'content_type': 'song', 'content_object': {'public_id': 'BlRgPJlHGH', 'title': 'Unity', 'file_url': 'http://127.0.0.1:8000/media/tracks/Unity__lxS-x7DACQ_140_AiL4Vbt.mp3', 'thumbnail_url': 'http://127.0.0.1:8000/media/images/song_thumbnail/unity_TC0FsME.jpg', 'release_date': '2025-03-09', 'duration': '00:00:12', 'is_explicit': False, 'version': 'Original', 'genres': ['Pop', 'Electronic'], 'artists': [{'public_id': 'u9iTzTGZOO', 'name': 'Alan Walker', 'role': 'Artist', 'profile_image_url': 'http://127.0.0.1:8000/media/images/artist_profile_image/alone.jpg'}], 'albums': [{'public_id': 'LfoXlvL8ur', 'title': 'Unity', 'thumbnail_url': 'http://127.0.0.1:8000/media/images/album_thumbnail/unity.jpg', 'release_date': datetime.date(2025, 3, 9), 'is_explicit': False}], 'analytics': {'play_count': 0, 'like_count': 0, 'dislike_count': 0}}, 'created_at': '2025-05-05T10:41:20.018510Z'}, {'content_type': 'album', 'content_object': {'public_id': 'LfoXlvL8ur', 'title': 'Unity', 'thumbnail_url': 'http://127.0.0.1:8000/media/images/album_thumbnail/unity.jpg', 'release_date': '2025-03-09', 'release_type': 'single', 'duration': '00:00:12', 'is_explicit': False, 'artists': [{'public_id': 'u9iTzTGZOO', 'name': 'Alan Walker', 'role': 'Artist', 'profile_image_url': 'http://127.0.0.1:8000/media/images/artist_profile_image/alone.jpg'}], 'songs': [{'order': 1, 'public_id': 'BlRgPJlHGH', 'title': 'Unity', 'file_url': 'http://127.0.0.1:8000/media/tracks/Unity__lxS-x7DACQ_140_AiL4Vbt.mp3', 'thumbnail_url': 'http://127.0.0.1:8000/media/images/song_thumbnail/unity_TC0FsME.jpg', 'release_date': datetime.date(2025, 3, 9), 'duration': datetime.timedelta(seconds=12), 'is_explicit': False, 'artists': [{'public_id': 'u9iTzTGZOO', 'name': 'Alan Walker', 'role': 'Artist'}], 'analytics': {'play_count': 0, 'like_count': 0, 'dislike_count': 0}}]}, 'created_at': '2025-05-05T14:56:15.598802Z'}]}]
