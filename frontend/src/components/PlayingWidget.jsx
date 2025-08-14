@@ -3,7 +3,6 @@ import parseLrc from "lrc-parser";
 import "../styles/PlayingWidget.css";
 import "../styles/General.css";
 import "../styles/Feed.css";
-// import PlayingContext from "../contexts/PlayingContext";
 import SeekBar from "./SeekBar";
 import api from "../api";
 import { Link } from "react-router-dom";
@@ -14,7 +13,6 @@ import {
   setQueue,
   addToQueue,
 } from "../store/playSlice";
-import { GridThumbnail } from "./Thumbnails";
 import {
   IconSVG,
   PlayIcon,
@@ -30,8 +28,11 @@ import {
   DislikeIcon,
   FilledLikeIcon,
   CheckPlaylistIcon,
+  QueueIcon,
+  LyricsIcon,
 } from "../assets/Icons";
 import PlaylistCheck from "./PlaylistCheck";
+import { SmallThumbnail } from "./Thumbnails";
 
 function PlayingWidget() {
   const audioRef = useRef(null);
@@ -47,6 +48,9 @@ function PlayingWidget() {
   const thresholdRef = useRef(null);
 
   const [showPlayingPage, setShowPlayingPage] = useState(false);
+
+  const [activeTab, setActiveTab] = useState("Queue");
+  const [showSection, setShowSection] = useState(true);
 
   const [showPlaylistCheck, setShowPlaylistCheck] = useState(false);
 
@@ -339,51 +343,30 @@ function PlayingWidget() {
             onTimeUpdate={handleTimeUpdate}
           />
           {showPlayingPage ? (
-            <div className="playing-page">
-              <div className="full-left-section">
-                <div className="left-thumbnail-section">
-                  <div className="large-thumbnail">
+            <div className={`playing-page ${showSection ? "active-more" : ""}`}>
+              <div className="player-section">
+                <div className="player-thumbnail-section">
+                  <div className="player-thumbnail-mask">
                     <img
                       src={playing && playing.thumbnail_url}
                       alt=""
-                      className="large-thumbnail-image"
+                      className="player-large-thumbnail-image"
                     />
-                  </div>
-                  <div className="left-title-section">
-                    <div className="title">
-                      <b>{playing && playing.title}</b>
-                    </div>
-                    <div className="title-info">
-                      {playing?.artists?.map((person) => (
-                        <Link
-                          to={"/artist/" + person.public_id}
-                          key={person.public_id}
-                        >
-                          {person.name + " "}
-                        </Link>
-                      ))}
-                    </div>
                   </div>
                 </div>
-                <div className="seek-bar-section">
-                  <div className="seek-bar">
-                    <SeekBar
-                      min="0"
-                      max="100"
-                      value={String((currentTime / duration) * 100)}
-                      onChange={handleSeek}
-                      played={(currentTime / duration) * 100}
-                    />
+                <div className="player-title-section">
+                  <div className="title">
+                    <b>{playing && playing.title}</b>
                   </div>
-                  <div className="playing-time">
-                    {Math.floor(currentTime / 60)}:
-                    {Math.floor(currentTime % 60)
-                      .toString()
-                      .padStart(2, "0")}{" "}
-                    /{Math.floor(duration / 60)}:
-                    {Math.floor(duration % 60)
-                      .toString()
-                      .padStart(2, "0")}
+                  <div className="title-info">
+                    {playing?.artists?.map((person) => (
+                      <Link
+                        to={"/artist/" + person.public_id}
+                        key={person.public_id}
+                      >
+                        {person.name + " "}
+                      </Link>
+                    ))}
                   </div>
                 </div>
                 <div className="extra-controls-section">
@@ -425,6 +408,31 @@ function PlayingWidget() {
                     </button>
                   </div>
                 </div>
+                <div className="seek-bar-section">
+                  <div className="seek-bar">
+                    <SeekBar
+                      min="0"
+                      max="100"
+                      value={String((currentTime / duration) * 100)}
+                      onChange={handleSeek}
+                      played={(currentTime / duration) * 100}
+                    />
+                  </div>
+                  <div className="player-time">
+                    <div className="playing-time">
+                      {Math.floor(currentTime / 60)}:
+                      {Math.floor(currentTime % 60)
+                        .toString()
+                        .padStart(2, "0")}{" "}
+                    </div>
+                    <div className="playing-time">
+                      {Math.floor(duration / 60)}:
+                      {Math.floor(duration % 60)
+                        .toString()
+                        .padStart(2, "0")}
+                    </div>
+                  </div>
+                </div>
                 <div className="controls-section">
                   <div className="controls">
                     <button className="controls-button">
@@ -439,7 +447,7 @@ function PlayingWidget() {
                       <IconSVG>{PreviousIcon}</IconSVG>
                     </button>
                   </div>
-                  <div className="controls">
+                  <div className="controls play-btn-container">
                     <button
                       className="controls-button play-pause"
                       onClick={handlePlayButton}
@@ -462,89 +470,142 @@ function PlayingWidget() {
                   </div>
                 </div>
               </div>
-              <div className="full-right-section">
-                <div className="tab">Up Next</div>
-                {lyrics && (
-                  <div className="lyrics-container" ref={lyricsContainerRef}>
-                    {lyrics.map((line, index) => (
-                      <div
-                        key={index}
-                        className={`lyric-line ${
-                          index === currentLyricIndex ? "active" : ""
-                        }`}
-                        onClick={() => handleLyricJump(line)}
-                      >
-                        {line.text}
-                      </div>
-                    ))}
+              <div className="more-section">
+                <div className="tab-buttons">
+                  <div className="tab-btn-container">
+                    <button
+                      className={`tab-button ${
+                        activeTab === "Queue" ? "active" : ""
+                      }`}
+                      onClick={() => {
+                        setActiveTab("Queue");
+                        if (
+                          (activeTab === "Queue" && showSection) ||
+                          !showSection
+                        ) {
+                          setShowSection(!showSection);
+                        }
+                      }}
+                    >
+                      <IconSVG>{QueueIcon}</IconSVG>
+                      <div className="icon-label">Queue</div>
+                    </button>
                   </div>
-                )}
-                <div className="song-queue-list queue-thumbnails">
-                  {queue?.map((song) => (
-                    <GridThumbnail item={song} key={song.public_id} />
-                  ))}
+                  <div className="tab-btn-container">
+                    <button
+                      className={`tab-button ${
+                        activeTab === "Lyrics" ? "active" : ""
+                      }`}
+                      onClick={() => {
+                        setActiveTab("Lyrics");
+                        if (
+                          (activeTab === "Lyrics" && showSection) ||
+                          !showSection
+                        ) {
+                          setShowSection(!showSection);
+                        }
+                      }}
+                    >
+                      <IconSVG>{LyricsIcon}</IconSVG>
+                      <div className="icon-label">Lyrics</div>
+                    </button>
+                  </div>
+                </div>
+                <div className="tab-content">
+                  {activeTab === "Queue" && (
+                    <div className="tab-panel">
+                      <div className="song-queue-list queue-thumbnails">
+                        {queue?.map((song) => (
+                          <div className="song-item" key={song.public_id}>
+                            <div className="song-item-thumbnail-section">
+                              <div className="song-item-thumbnail">
+                                <img
+                                  src={song.thumbnail_url}
+                                  alt=""
+                                  className="song-item-image"
+                                />
+                              </div>
+                              <div
+                                className="overlay"
+                                onClick={() => {
+                                  if (playing.public_id != song.public_id) {
+                                    if (
+                                      currentIndex != 0 &&
+                                      currentIndex < queue.length
+                                    ) {
+                                      dispatch(setPlaying(queue[currentIndex]));
+                                      dispatch(setIsPlaying(true));
+                                    } else {
+                                      dispatch(setPlaying(queue[0]));
+                                      dispatch(setIsPlaying(true));
+                                    }
+                                    dispatch(setQueue(queue));
+                                  } else {
+                                    dispatch(setIsPlaying(!isPlaying));
+                                  }
+                                }}
+                              >
+                                <button className="controls-button play-pause">
+                                  <IconSVG>
+                                    {isPlaying &&
+                                    playing.public_id === song.public_id
+                                      ? PauseIcon
+                                      : PlayIcon}
+                                  </IconSVG>
+                                </button>
+                              </div>
+                            </div>
+                            <div className="title-section">
+                              <div className="title">
+                                <Link to={"/song/" + song.public_id}>
+                                  <b>{song.title}</b>
+                                </Link>
+                              </div>
+                              <div className="title-info">
+                                {song.artists.map((person) => (
+                                  <Link
+                                    to={"/artist/" + person.public_id}
+                                    key={person.public_id}
+                                  >
+                                    {person.name + " "}
+                                  </Link>
+                                ))}
+                              </div>
+                            </div>
+                            <div className="duration">{song.duration}</div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {activeTab === "Lyrics" && (
+                    <div className="tab-panel">
+                      {lyrics && (
+                        <div
+                          className="lyrics-container"
+                          ref={lyricsContainerRef}
+                        >
+                          {lyrics.map((line, index) => (
+                            <div
+                              key={index}
+                              className={`lyric-line ${
+                                index === currentLyricIndex ? "active" : ""
+                              }`}
+                              onClick={() => handleLyricJump(line)}
+                            >
+                              {line.text}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
           ) : (
             <div className="playing-widget">
               <div className="widget-left-section">
-                <div className="controls">
-                  <button
-                    className="controls-button"
-                    onClick={handlePreviousSong}
-                  >
-                    <IconSVG>{PreviousIcon}</IconSVG>
-                  </button>
-                </div>
-                <div className="controls play-pause-controls">
-                  <button
-                    className="controls-button play-pause"
-                    onClick={handlePlayButton}
-                  >
-                    <IconSVG>{isPlaying ? PauseIcon : PlayIcon}</IconSVG>
-                  </button>
-                </div>
-                <div className="controls">
-                  <button className="controls-button" onClick={handleNextSong}>
-                    <IconSVG>{NextIcon}</IconSVG>
-                  </button>
-                </div>
-                <div className="controls">
-                  <button className="controls-button">
-                    <IconSVG>{ShuffleIcon}</IconSVG>
-                  </button>
-                </div>
-                <div className="controls">
-                  <button className="controls-button" onClick={handleRepeat}>
-                    <IconSVG>{RepeatIcon}</IconSVG>
-                  </button>
-                </div>
-              </div>
-              <div className="seek-bar-section">
-                <>
-                  <div className="seek-bar">
-                    <SeekBar
-                      min="0"
-                      max="100"
-                      value={String((currentTime / duration) * 100)}
-                      onChange={handleSeek}
-                      played={(currentTime / duration) * 100}
-                    />
-                  </div>
-                  <div className="playing-time">
-                    {Math.floor(currentTime / 60)}:
-                    {Math.floor(currentTime % 60)
-                      .toString()
-                      .padStart(2, "0")}{" "}
-                    /{Math.floor(duration / 60)}:
-                    {Math.floor(duration % 60)
-                      .toString()
-                      .padStart(2, "0")}
-                  </div>
-                </>
-              </div>
-              <div className="widget-center-section">
                 <div className="widget-thumbnail">
                   <img
                     src={playing && playing.thumbnail_url}
@@ -565,6 +626,67 @@ function PlayingWidget() {
                         {person.name + " "}
                       </Link>
                     ))}
+                  </div>
+                </div>
+              </div>
+              <div className="widget-center-section">
+                <div className="controls-section">
+                  <div className="controls">
+                    <button className="controls-button">
+                      <IconSVG>{ShuffleIcon}</IconSVG>
+                    </button>
+                  </div>
+                  <div className="controls">
+                    <button
+                      className="controls-button"
+                      onClick={handlePreviousSong}
+                    >
+                      <IconSVG>{PreviousIcon}</IconSVG>
+                    </button>
+                  </div>
+                  <div className="controls play-pause-controls">
+                    <button
+                      className="controls-button play-pause"
+                      onClick={handlePlayButton}
+                    >
+                      <IconSVG>{isPlaying ? PauseIcon : PlayIcon}</IconSVG>
+                    </button>
+                  </div>
+                  <div className="controls">
+                    <button
+                      className="controls-button"
+                      onClick={handleNextSong}
+                    >
+                      <IconSVG>{NextIcon}</IconSVG>
+                    </button>
+                  </div>
+                  <div className="controls">
+                    <button className="controls-button" onClick={handleRepeat}>
+                      <IconSVG>{RepeatIcon}</IconSVG>
+                    </button>
+                  </div>
+                </div>
+                <div className="seek-bar-section">
+                  <div className="playing-time left">
+                    {Math.floor(currentTime / 60)}:
+                    {Math.floor(currentTime % 60)
+                      .toString()
+                      .padStart(2, "0")}{" "}
+                  </div>
+                  <div className="seek-bar">
+                    <SeekBar
+                      min="0"
+                      max="100"
+                      value={String((currentTime / duration) * 100)}
+                      onChange={handleSeek}
+                      played={(currentTime / duration) * 100}
+                    />
+                  </div>
+                  <div className="playing-time right">
+                    {Math.floor(duration / 60)}:
+                    {Math.floor(duration % 60)
+                      .toString()
+                      .padStart(2, "0")}
                   </div>
                 </div>
               </div>
@@ -591,12 +713,26 @@ function PlayingWidget() {
                     </IconSVG>
                   </button>
                 </div>
-                <div className="controls play-pause-controls compact">
+                <div className="controls">
                   <button
-                    className="controls-button play-pause"
-                    onClick={handlePlayButton}
+                    className="controls-button"
+                    onClick={() => {
+                      setShowPlayingPage(true);
+                      setActiveTab("Queue");
+                    }}
                   >
-                    <IconSVG>{isPlaying ? PauseIcon : PlayIcon}</IconSVG>
+                    <IconSVG>{QueueIcon}</IconSVG>
+                  </button>
+                </div>
+                <div className="controls">
+                  <button
+                    className="controls-button"
+                    onClick={() => {
+                      setShowPlayingPage(true);
+                      setActiveTab("Lyrics");
+                    }}
+                  >
+                    <IconSVG>{LyricsIcon}</IconSVG>
                   </button>
                 </div>
                 <div className="controls arrow">

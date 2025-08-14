@@ -53,11 +53,13 @@ class CreateSongView(generics.CreateAPIView):
 class CreateArtistView(generics.CreateAPIView):
     serializer_class = ss.ArtistSerializer
     permission_classes = [IsAuthenticated]
+    queryset = cm.Artist.objects.all()
 
 
 class CreateAlbumView(generics.CreateAPIView):
     serializer_class = ss.AlbumSerializer
     permission_classes = [IsAuthenticated]
+    queryset = cm.Album.objects.all()
 
 
 class UpdateSongView(generics.UpdateAPIView):

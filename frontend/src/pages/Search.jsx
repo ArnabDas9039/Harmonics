@@ -15,6 +15,7 @@ function Search() {
       try {
         const response = await api.get(`api/search/?q=${query}`);
         setResults(response.data);
+        console.log(response);
       } catch (err) {
         console.log(err);
       }
@@ -30,7 +31,7 @@ function Search() {
       <div>Top Result</div>
       <div className="medium-thumbnails">
         {results.songs?.map((song) => (
-          <MediumThumbnail item={song} />
+          <MediumThumbnail item={song} content_type={"song"} />
         ))}
       </div>
     </div>

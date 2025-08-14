@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import api from "../api";
 import { AddIcon, IconSVG } from "../assets/Icons";
-import { GridThumbnail } from "./Thumbnails";
+import { Link } from "react-router-dom";
 
 const overlayStyle = {
   position: "fixed",
@@ -175,13 +175,29 @@ function PlaylistCheck({ onClose, onChange, currentSong }) {
           </div>
           <div className="playlist-list">
             {playlists.map((item) => (
-              <div className="playlist-list-item">
+              <div className="song-item" key={item.public_id}>
                 <input
                   type="checkbox"
                   checked={checked.includes(item.public_id)}
                   onChange={() => handleCheck(item.public_id)}
                 />
-                <GridThumbnail item={item} />
+                <div className="song-item-thumbnail-section">
+                  <div className="song-item-thumbnail">
+                    <img
+                      src={item.thumbnail_url}
+                      alt=""
+                      className="song-item-image"
+                    />
+                  </div>
+                </div>
+                <div className="title-section">
+                  <div className="title">
+                    <Link to={"/playlist/" + item.public_id}>
+                      <b>{item.title}</b>
+                    </Link>
+                  </div>
+                  <div className="title-info">{item.songs?.length} tracks</div>
+                </div>
               </div>
             ))}
           </div>

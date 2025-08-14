@@ -9,7 +9,6 @@ Harmonics is a full-stack music streaming web application developed using Django
 - Technologies used
 - Format of Project
 - Features
-- API endpoints
 
 ## Technologies used
 
@@ -45,7 +44,21 @@ Next, the backend directory contains a **Django App** named **api** created usin
 python manage.py startapp api
 ```
 
-The api directory contains all the logic and code that are required for the backend.
+The backend project directory has been further divided into apps which also has led to separation of different functionalities. The apps are listed below -
+
+```bash
+backend/
+|---analytics/
+|---api/
+|---authentication/
+|---content/
+|---engine/
+|---room/
+|---studio/
+|---user/
+```
+
+All the major serialization of data is concerned with api app for users of Harmonics and studio api for special access to users with Harmonics Studio.
 
 ```bash
 api/
@@ -213,47 +226,20 @@ All these above features are generated dynamically using JSON data that is provi
 ```Python
 # urls.py
 urlpatterns = [
-    path("song/<id>", views.SongView.as_view(), name="song_info"),
-    path("songs/top/", views.TopSongsListView.as_view(), name="top_songs"),
-    path("artists/top/", views.TopArtistListView.as_view(), name="top_artists"),
-    path("artist/<id>", views.ArtistView.as_view(), name="artist_info"),
-    path("album/<id>", views.AlbumView.as_view(), name="album_info"),
-    path("playlist/<id>", views.PlaylistView.as_view(), name="playlist_info"),
+    path("song/<public_id>", views.SongView.as_view(), name="song_info"),
+    path("artist/<public_id>", views.ArtistView.as_view(), name="artist_info"),
+    path("album/<public_id>", views.AlbumView.as_view(), name="album_info"),
+    path("playlist/<pubilc_id>", views.PlaylistView.as_view(), name="playlist_info"),
     # Other endpoints
 ]
 ```
 
-### 4. Artist Following
+### 4. Analytics
 
-Users can follow their favorite artists to receive updates on new albums and songs.
-
-```Python
-# urls.py
-urlpatterns = [
-path(
-        "library/post/artist/",
-        views.UpdateLibraryArtistView.as_view(),
-        name="library_post_artist",
-    ),
-    # Other endpoints
-]
-# views.py
-class UpdateLibraryArtistView(generics.UpdateAPIView):
-    serializer_class = CreateLibrarySerializer
-    permission_classes = [IsAuthenticated]
-
-    def put(self, request):
-        # ... more logic
-        library.followed_artists.add(song)
-        library.save()
-
-# Other views
-```
-
-### 5. Play Count and Analytics
-
-Each song and album maintains a play count, which updates dynamically as users play content.
+Each song, album, playlist maintain a play count, like count, dislike, save count which updates dynamically as users play and interact with content. Also, every user content interaction be it like, dislike, play or save are saved in User_Content_Interaction model, which periodically counts and updates the analytics model.
 Admins can access detailed analytics for the most played songs and user engagement metrics.
+
+### 5. Harmonics Studio
 
 ### 6. Responsive Frontend
 
@@ -267,19 +253,34 @@ function PlayingWidget() {
 }
 ```
 
+## Planned Features
+
+### 7. Trending and Explore
+
+### 8. Upgraded Recommendation Engine with better Radio and user feed
+
+### 9. Frontend for Studio
+
+### 10. Lyrics editor for Studio
+
+### 11. Karaoke mode with recording and uploading features
+
+### 12. Listening Rooms
+
 ## API Endpoints
 
-**1. Authentication:**
+**1. User authentication:** located in backend/urls.py
 | URLs | Description |
 |:-----|:------------|
-|**POST** /api/user/register/|Register a new user.|
-|**POST** /api/token/|Login with credentials.|
-|**POST** /api/token/refersh/|Refresh the TOKEN|
+|**POST** /api/login/|Login with credentials.|
+|**POST** /auth/refersh/|Refresh the TOKEN|
+|**POST** /auth/logout/|Logout the user|
+|**GET** /auth/check/|Check for authentication status|
 
 **2. User Profile**
 | URLs | Description |
 |:-----|:------------|
-|**GET** /api/users/`<username>`/|Retrieve user profile information.|
+|**GET** /api/users/`<username>`/|Retrieve any user's public information.|
 |**PUT** /api/users/`<username>`/|Update user profile details.|
 
 **3. User Content**

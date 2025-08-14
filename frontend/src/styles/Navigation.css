@@ -71,6 +71,10 @@
         background-color: var(--md-sys-color-secondary-container);
     }
 
+    .nav-button:hover .icon svg {
+        fill: var(--md-sys-color-on-surface-variant);
+    }
+
     .nav-button:hover .icon-label {
         color: var(--md-sys-color-on-surface-variant);
         font-weight: bold;
@@ -78,11 +82,6 @@
 
     .active .icon {
         background-color: var(--md-sys-color-surface-container-highest);
-    }
-
-    .active {
-        color: var(--md-sys-color-on-surface-variant);
-        /* font-weight: bold; */
     }
 
     .navigation .icon-label {
@@ -128,6 +127,10 @@
         background-color: var(--md-sys-color-secondary-container);
     }
 
+    .nav-button:hover .icon svg {
+        fill: var(--md-sys-color-on-surface-variant);
+    }
+
     .nav-button:hover .icon-label {
         color: var(--md-sys-color-on-surface-variant);
         font-weight: bold;
@@ -168,6 +171,10 @@
         background-color: var(--md-sys-color-secondary-container);
         color: var(--md-sys-color-on-surface-variant);
         font-weight: bold;
+    }
+
+    .nav-button:hover .icon svg {
+        fill: var(--md-sys-color-on-surface-variant);
     }
 
     .active {
@@ -236,6 +243,10 @@
         color: var(--md-sys-color-on-secondary);
     }
 
+    .new-playlist-btn:hover .icon svg {
+        fill: var(--md-sys-color-on-secondary);
+    }
+
     .new-playlist-btn .icon {
         padding-left: 24px;
     }
@@ -283,6 +294,7 @@
 
 .playlist-form-btn {
     background-color: inherit;
+    color: inherit;
     border: none;
     border-radius: 20px;
     height: 40px;

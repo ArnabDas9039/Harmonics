@@ -6,9 +6,9 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-# from rest_framework.views import APIView
-from content import models as cm
 from analytics import models as alm
+from content import models as cm
+from engine import models as em
 from user import models as um
 from user import serializers as us
 from . import models as apim
@@ -465,28 +465,19 @@ class CreateLibraryView(generics.CreateAPIView):
             raise ValidationError({"detail": f"No object found with id: {object_id}."})
 
 
-# class RadioView(generics.RetrieveAPIView):
-#     serializer_class = RadioSerializer
-#     permission_classes = [IsAuthenticated]
-#     lookup_field = "id"
+class RadioView(generics.RetrieveAPIView):
+    serializer_class = apis.RadioSerializer
+    permission_classes = [AllowAny]
+    lookup_field = "public_id"
 
-#     def get_queryset(self):
-#         return Radio.objects.all()
+    def get_queryset(self):
+        return em.Radio.objects.filter(public_id=self.kwargs["public_id"])
 
 
-# class CreateRadioView(generics.CreateAPIView):
-#     serializer_class = CreateRadioSerializer
-#     permission_classes = [AllowAny]
-
-#     def post(self, request, *args, **kwargs):
-#         # queuemodifier = RadioCreate(data=request.data)
-#         self.request.user = User.objects.get(username="arnabdas")
-#         serializer = CreateRadioSerializer(data=request.data)
-#         if serializer.is_valid():
-#             serializer.save(user=request.user)
-#             return Response(serializer.data, status=status.HTTP_201_CREATED)
-#         logger.error("Validation errors: %s", serializer.errors)
-#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+class CreateRadioView(generics.CreateAPIView):
+    serializer_class = apis.RadioSerializer
+    permission_classes = [AllowAny]
+    queryset = em.Radio.objects.all()
 
 
 # class CreateRoomView(generics.CreateAPIView):

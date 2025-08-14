@@ -69,8 +69,8 @@ function PlaylistCreateForm({ onClose, onSuccess }) {
           onChange={(e) => setPrivacy(e.target.value)}
           required
         >
-          <option value="private">Private</option>
-          <option value="public">Public</option>
+          <option value="Private">Private</option>
+          <option value="Public">Public</option>
         </select>
         <div className="playlist-form-btn-container">
           <button className="playlist-form-btn" onClick={onClose}>

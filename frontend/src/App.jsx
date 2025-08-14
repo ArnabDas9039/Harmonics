@@ -44,6 +44,36 @@ function App() {
   return (
     <>
       {/* {roomId ? <div className="RoomContext">In A Room</div> : <></>} */}
+      <div className="logo-section">
+        <div className="logo">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 -960 960 960"
+            height="50px"
+            width="50px"
+            fill="url(#myGradient)"
+          >
+            <defs>
+              <linearGradient
+                id="myGradient"
+                x1="0%"
+                y1="0%"
+                x2="100%"
+                y2="80%"
+              >
+                <stop offset="30%" stopColor="var(--md-sys-color-primary)" />
+                <stop offset="62%" stopColor="var(--md-sys-color-secondary)" />
+                <stop offset="85%" stopColor="var(--md-sys-color-tertiary)" />
+              </linearGradient>
+            </defs>
+            <path
+              d="M479.49,36.23C344.46,36.23,235,145.7,235,280.73S344.46,525.22,479.49,525.22,724,415.75,724,280.73,614.52,36.23,479.49,36.23ZM619.76,383.12a73.32,73.32,0,1,1-31.65-60.33V252.14a10.7,10.7,0,0,0-10.7-10.71H453a10.7,10.7,0,0,0-10.71,10.71h0c-.05,66.73-.09,131-.09,131a73.32,73.32,0,1,1-31.65-60.33V120.92a15.91,15.91,0,1,1,31.82,0v.22h0c0,14.82,0,40-.05,68.32l0-68.32h-.15l.1,77.74A10.71,10.71,0,0,0,453,209.59H577.41a10.71,10.71,0,0,0,10.7-10.71v-78a15.91,15.91,0,1,1,31.82,0h0C619.9,180,619.76,383.12,619.76,383.12Z"
+              transform="translate(-400 -965) scale(1.8)"
+            />
+          </svg>
+        </div>
+        <div className="app-name">Harmonics</div>
+      </div>
       <Navigation onNewPlaylist={() => setShowPlaylistForm(true)} />
       <PlayingWidget />
       {/* <div style={{ position: "fixed", top: 90, right: 32, zIndex: 999 }}>

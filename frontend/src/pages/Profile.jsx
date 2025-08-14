@@ -24,7 +24,7 @@ function Profile() {
   return (
     <div className="body">
       <Header destination="Profile" />
-      <div className="info">
+      <div className="info-page">
         <div className="profile-section">
           <div className="profile-thumbnail">
             <img
@@ -38,7 +38,7 @@ function Profile() {
           {/* <div className="user-settings">{profile.user_settings}</div> */}
         </div>
       </div>
-      <div className="Logout-button">
+      <div className="logout-button">
         <Link to="/logout">Logout</Link>
       </div>
     </div>

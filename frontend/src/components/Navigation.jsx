@@ -11,6 +11,7 @@ import {
   AddIcon,
 } from "../assets/Icons";
 import { useSelector } from "react-redux";
+import { useEffect } from "react";
 
 function Navigation({ onNewPlaylist }) {
   const location = useLocation();

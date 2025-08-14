@@ -36,7 +36,7 @@ class Playlist(models.Model):
         if not self.public_id:
             while True:
                 random_id = generate_random_id()
-                if not cm.Song.objects.filter(public_id=random_id).exists():
+                if not Playlist.objects.filter(public_id=random_id).exists():
                     self.public_id = random_id
                     break
         super().save(*args, **kwargs)

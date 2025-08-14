@@ -1,6 +1,6 @@
-@import "./css/light.css";
+/* @import "./css/light.css"; */
 
-/* @import "./css/dark.css"; */
+@import "./css/dark.css";
 
 body {
     font-family: Roboto, Arial;
@@ -22,18 +22,22 @@ body {
     left: 0;
     z-index: 2;
     display: flex;
+    align-items: center;
+    padding: 8px 15px;
 }
 
-.logo {
-    padding: 12px;
-    border-radius: 20px;
-    overflow: hidden;
-}
-
-.logo-image {
-    height: 56px;
-    width: 56px;
-    border-radius: 28px;
+.app-name {
+    /* color: var(--md-sys-color-primary); */
+    background: linear-gradient(38deg,
+            var(--md-sys-color-tertiary) 15%,
+            var(--md-sys-color-secondary) 38%,
+            var(--md-sys-color-primary) 70%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    color: transparent;
+    padding-left: 10px;
+    font-size: 20px;
 }
 
 /* .RoomContext {
@@ -62,11 +66,19 @@ body {
     .header {
         padding-left: 60px;
     }
+
+    .app-name {
+        display: none;
+    }
 }
 
 @media (min-width: 600px) and (max-width: 1200px) {
     .body {
         padding-left: 80px;
+    }
+
+    .app-name {
+        display: none;
     }
 }
 

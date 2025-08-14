@@ -64,8 +64,8 @@ function Home() {
           ))}
         </div>
         {userFeed.map((feed) => (
-          <>
-            <div className="heading-section" key={feed.group}>
+          <div key={feed.group}>
+            <div className="heading-section">
               <div className="heading">
                 <b>{feed.group}</b>
               </div>
@@ -79,7 +79,7 @@ function Home() {
                 />
               ))}
             </div>
-          </>
+          </div>
         ))}
       </div>
     </div>

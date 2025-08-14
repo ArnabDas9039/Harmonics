@@ -7,7 +7,7 @@ import { Link } from "react-router-dom";
 import "../styles/Info.css";
 import { useDispatch, useSelector } from "react-redux";
 import { setIsPlaying, setPlaying, setQueue } from "../store/playSlice";
-import { GridThumbnail, MediumThumbnail } from "../components/Thumbnails";
+import { MediumThumbnail } from "../components/Thumbnails";
 import {
   IconSVG,
   PlayIcon,
@@ -15,9 +15,12 @@ import {
   LikeIcon,
   FilledLikeIcon,
   AddToPlaylistIcon,
-  QueueIcon,
   CheckPlaylistIcon,
   ExplicitIcon,
+  AddLibraryIcon,
+  AddLibraryCheckIcon,
+  AddToQueueIcon,
+  QueueIcon,
 } from "../assets/Icons";
 
 const ReadMore = ({ text, limit = 100 }) => {
@@ -35,10 +38,7 @@ const ReadMore = ({ text, limit = 100 }) => {
     <div>
       {/* {isExpanded ? text : `${text.slice(0, limit)}...`} */}
       {isExpanded ? text : text}
-      <button
-        onClick={toggleReadMore}
-        style={{ marginLeft: "5px", cursor: "pointer" }}
-      >
+      <button className="read-more" onClick={toggleReadMore}>
         {isExpanded ? "Show Less" : "Read More"}
       </button>
     </div>
@@ -85,11 +85,8 @@ export function Song_Info() {
       dispatch(setIsPlaying(true));
       dispatch(setQueue([]));
     } else {
-      // dispatch(setPlaying(item));
-      // console.log(playing);
       dispatch(setIsPlaying(!isPlaying));
     }
-    // console.log(item.file_url);
   };
 
   return (
@@ -132,10 +129,26 @@ export function Song_Info() {
               <button className="controls-button">
                 <IconSVG>
                   {item.interactions?.some(
+                    (interaction) => interaction.interaction_type === "Like"
+                  )
+                    ? FilledLikeIcon
+                    : LikeIcon}
+                </IconSVG>
+              </button>
+            </div>
+            <div className="controls">
+              <button className="controls-button">
+                <IconSVG>{AddToQueueIcon}</IconSVG>
+              </button>
+            </div>
+            <div className="controls">
+              <button className="controls-button">
+                <IconSVG>
+                  {item.interactions?.some(
                     (interaction) => interaction.interaction_type === "Save"
                   )
-                    ? CheckPlaylistIcon
-                    : AddToPlaylistIcon}
+                    ? AddLibraryCheckIcon
+                    : AddLibraryIcon}
                 </IconSVG>
               </button>
             </div>
@@ -143,10 +156,10 @@ export function Song_Info() {
               <button className="controls-button">
                 <IconSVG>
                   {item.interactions?.some(
-                    (interaction) => interaction.interaction_type === "Like"
+                    (interaction) => interaction.interaction_type === "Save"
                   )
-                    ? FilledLikeIcon
-                    : LikeIcon}
+                    ? CheckPlaylistIcon
+                    : AddToPlaylistIcon}
                 </IconSVG>
               </button>
             </div>
@@ -212,6 +225,7 @@ export function Artist_Info() {
   const [albums, setAlbums] = useState([]);
   const [isExpanded, setIsExpanded] = useState(false);
   const { isPlaying, playing } = useSelector((state) => state.play);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     getItem();
@@ -224,35 +238,30 @@ export function Artist_Info() {
     setIsExpanded(!isExpanded);
   };
 
-  const handlePlayButton = () => {
-    if (playing.public_id === item.public_id) {
-      setIsPlaying(!isPlaying);
-    } else {
-      setPlaying(item);
-      setIsPlaying(true);
-    }
-    console.log(item.file_url);
-  };
+  const handlePlayButton = () => {};
 
   const getItem = async () => {
-    await api
-      .get(`/api/artist/${artist_id}`)
-      .then((res) => res.data)
-      .then((data) => {
-        console.log(data);
-        setItem(data);
-        setSongs(data.songs);
-        setAlbums(data.albums);
-      })
-      .catch((err) => alert(err));
+    try {
+      const response = await api.get(`/api/artist/${artist_id}`);
+      if (response.status === 200) {
+        // console.log(data);
+        setItem(response.data);
+        setSongs(response.data.songs);
+        setAlbums(response.data.albums);
+      }
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   const handlefollow = async () => {
     try {
-      const response = await api.put("/api/library/post/artist/", {
-        artist_id: item.public_id,
+      const response = await api.post("/api/interact/toggle/", {
+        content_type: "artist",
+        object_id: artist_id,
+        interaction_type: "save",
       });
-      console.log(response.data);
+      // console.log(response.data);
     } catch (err) {
       console.log(err);
     }
@@ -270,38 +279,36 @@ export function Artist_Info() {
           </div>
         </div>
         <div className="artist-info-section">
-          <div className="artist-name">{item.name}</div>
-          {item.analytics && (
-            <div className="artist-title">
-              {item.analytics.follower_count} Followers
-            </div>
-          )}
-          {item.bio && (
-            <div className="artist-bio">
-              {isExpanded ? item.bio : `${item.bio.slice(0, 50)}...`}
-              <button
-                onClick={toggleReadMore}
-                style={{
-                  marginLeft: "5px",
-                  cursor: "pointer",
-                }}
-              >
-                {isExpanded ? "Show Less" : "Read More"}
-              </button>
-            </div>
-          )}
+          <div className="text">
+            <div className="artist-name">{item.name}</div>
+            {item.analytics && (
+              <div className="artist-follow-count">
+                {item.analytics.save_count} Followers
+              </div>
+            )}
+            {item.bio && (
+              <div className="artist-bio">
+                {isExpanded ? item.bio : `${item.bio.slice(0, 50)}...`}
+                <button className="read-more" onClick={toggleReadMore}>
+                  {isExpanded ? "Show Less" : "Read More"}
+                </button>
+              </div>
+            )}
+          </div>
           <div className="options">
             <div className="controls">
               <button className="controls-button play-pause">
                 <IconSVG>{isPlaying ? PauseIcon : PlayIcon}</IconSVG>
               </button>
             </div>
-            <div className="controls">
-              <button className="controls-button" onClick={handlefollow}>
+            <div className="follow-container">
+              <button className="follow-button" onClick={handlefollow}>
                 Follow
               </button>
             </div>
           </div>
+        </div>
+        <div className="content">
           <div className="heading-section">
             <div className="heading">
               <b>Songs</b>
@@ -322,17 +329,41 @@ export function Artist_Info() {
                   <div
                     className="overlay"
                     onClick={() => {
-                      if (playing.public_id === song.id) {
-                        setIsPlaying(!isPlaying);
+                      if (
+                        playing.public_id != song.public_id ||
+                        playing.source_id != item.public_id
+                      ) {
+                        const qsongs =
+                          item.songs?.map((song) => ({
+                            ...song,
+                            source_id: item.public_id,
+                            source_type: "artist",
+                          })) || [];
+                        const currentIndex = qsongs.findIndex(
+                          (item) => item.public_id === song.public_id
+                        );
+                        console.log(currentIndex);
+                        if (currentIndex != 0 && currentIndex < qsongs.length) {
+                          dispatch(setPlaying(qsongs[currentIndex]));
+                          dispatch(setIsPlaying(true));
+                        } else {
+                          dispatch(setPlaying(qsongs[0]));
+                          dispatch(setIsPlaying(true));
+                        }
+                        dispatch(setQueue(qsongs));
                       } else {
-                        setPlaying(song);
-                        setIsPlaying(true);
+                        dispatch(setIsPlaying(!isPlaying));
                       }
-                      console.log(song.file_url);
                     }}
                   >
                     <button className="controls-button play-pause">
-                      <IconSVG>{isPlaying ? PauseIcon : PlayIcon}</IconSVG>
+                      <IconSVG>
+                        {isPlaying &&
+                        playing.source_id === item.public_id &&
+                        playing.public_id === song.public_id
+                          ? PauseIcon
+                          : PlayIcon}
+                      </IconSVG>
                     </button>
                   </div>
                 </div>
@@ -661,6 +692,12 @@ export function Playlist_Info() {
             </div>
           </div>
           <div className="song-list">
+            <div className="song-item heading">
+              <div className="order">#</div>
+              <div className="song-item-thumbnail-section">Song</div>
+              <div className="title-section"></div>
+              <div className="duration">duration</div>
+            </div>
             {songs.map((song) => (
               <div className="song-item" key={song.public_id}>
                 <div className="order">{song.order}</div>

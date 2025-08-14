@@ -34,21 +34,55 @@
     padding: 20px;
 }
 
+.artist-info-section {
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.artist-follow-count {
+    padding: 5px 10px;
+}
+
+.artist-bio {
+    padding: 5px 10px;
+    font-size: 14px;
+}
+
+.artist-info-section .options {
+    display: flex;
+    width: 180px;
+    justify-content: space-evenly;
+}
+
+.artist-info .heading-section {
+    margin: 0;
+}
+
 .large-thumbnail {
-    max-height: 560px;
-    width: 100%;
+    max-height: 480px;
     padding: 10px;
 }
 
 .large-artist-thumbnail {
     height: 500px;
     width: 100%;
+    overflow: hidden;
 }
 
 .large-thumbnail-image {
-    height: inherit;
+    height: 100%;
+    width: 100%;
+    max-height: 480px;
     object-fit: contain;
-    border-radius: 20px;
+    border-radius: 10%;
+}
+
+.large-artist-thumbnail .large-thumbnail-image {
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
+    border-radius: 0;
 }
 
 .info-page .info-section {
@@ -172,6 +206,7 @@
 }
 
 .song-item .title-info {
+    text-transform: capitalize;
     font-size: 14px;
 }
 
@@ -179,9 +214,7 @@
     padding: 20px;
 }
 
-@media (min-width: 1200px) {}
 
-@media (min-width: 600px) and (max-width: 1200px) {}
 
 @media (max-width: 600px) {
     .info-page {
@@ -215,4 +248,38 @@
     .large-thumbnail-image {
         height: 100%;
     }
+
+    .artist-info-section .artist-bio {
+        display: none;
+    }
+}
+
+@media (min-width: 600px) and (max-width: 1200px) {}
+
+@media (min-width: 1200px) {}
+
+.read-more {
+    background-color: var(--md-sys-color-background);
+    color: var(--md-sys-color-on-background);
+    border: none;
+}
+
+.follow-container {
+    background-color: var(--md-sys-color-secondary-container);
+    color: var(--md-sys-color-on-secondary-container);
+    border-radius: 40px;
+}
+
+.follow-container :hover {
+    background-color: var(--md-sys-color-secondary);
+    color: var(--md-sys-color-on-secondary);
+}
+
+.follow-button {
+    border-radius: 40px;
+    border: 0;
+    padding: 10px;
+    width: 84px;
+    background-color: inherit;
+    color: inherit;
 }

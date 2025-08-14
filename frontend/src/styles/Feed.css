@@ -168,6 +168,10 @@
     align-items: center;
 }
 
+.title-info {
+    text-transform: capitalize;
+}
+
 .info:hover {
     background-color: var(--md-sys-color-surface-container-high);
 }
@@ -202,8 +206,24 @@
     padding: 4px;
 }
 
+.controls {
+    color: var(--md-sys-color-on-primary-container);
+}
+
+.play-pause svg {
+    fill: var(--md-sys-color-on-primary-container)
+}
+
 .overlay .controls :hover {
     background-color: var(--md-sys-color-surface-container-highest);
+}
+
+.controls :hover {
+    color: var(--md-sys-color-on-secondary-container);
+}
+
+.controls :hover svg {
+    fill: var(--md-sys-color-on-secondary-container)
 }
 
 .title-section {
@@ -219,105 +239,30 @@
 
 /* Large and Extra Large */
 
-@media (min-width: 600px) and (max-width: 1200px) {
-    /* .featured{
-        max-height: 400px;
-        --visible-cols: 3;
-        grid-template-rows: 100%;
-    }
-    .featured-image{
-        width: auto;
-        height: 100%;
-    }
-    .item1{
-        grid-column: 1 / 3;
-        grid-row: 1;
-    }
-    .item1 .featured-image{
-        height: auto;
-        width: 100%;
-    }
-    .item2{
-        grid-column: 3;
-        grid-row: 1;
-    }
-    .item3{
-        grid-column: 4;
-        grid-row: 1;
-    }
-    .featured .info{
-        height: 100%;
-    } */
-}
-
 @media (max-width: 600px) {
 
-    /* .featured{
-        max-height: 300px;
-        --visible-cols: 1;
-        grid-template-rows: 100%;
-    }
-    .item1{
-        grid-column: 1;
-        grid-row: 1;
-    }
-    .item2{
-        grid-column: 2;
-        grid-row: 1;
-    }
-    .item3{
-        grid-column: 3;
-        grid-row: 1;
-    }
-    .featured .info{
-        height: 100%;
-    } */
-    .medium-thumbnails,
-    .artist-thumbnails {
+    .medium-thumbnails {
         --visible-cols: 2;
-    }
-
-    .wide-thumbnails {
-        --visible-cols: 1.5;
     }
 }
 
 @media (min-width: 600px) and (max-width: 840px) {
 
-    /* .featured{
-        --visible-cols: 2;
-        max-height: 350px;
-    } */
-    .medium-thumbnails,
-    .artist-thumbnails {
+    .medium-thumbnails {
         --visible-cols: 3;
-    }
-
-    .wide-thumbnails {
-        --visible-cols: 1.5;
     }
 }
 
 @media (min-width: 840px) and (max-width: 1200px) {
 
-    .medium-thumbnails,
-    .artist-thumbnails {
+    .medium-thumbnails {
         --visible-cols: 4;
-    }
-
-    .wide-thumbnails {
-        --visible-cols: 2;
     }
 }
 
 @media (min-width: 1200px) {
 
-    .medium-thumbnails,
-    .artist-thumbnails {
+    .medium-thumbnails {
         --visible-cols: 5;
-    }
-
-    .wide-thumbnails {
-        --visible-cols: 3;
     }
 }

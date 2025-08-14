@@ -13,3 +13,15 @@ class Content_Data(models.Model):
     dislike_count = models.PositiveIntegerField(default=0)
     save_count = models.PositiveIntegerField(default=0)
     last_updated = models.DateTimeField(auto_now_add=True)
+
+
+class TrendingScore(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.PositiveIntegerField()
+    content_object = GenericForeignKey("content_type", "object_id")
+    score = models.FloatField()
+    last_updated = models.DateTimeField(auto_now_add=True)
+
+    # class Meta:
+    #     unique_together = ("content_type", "object_id")

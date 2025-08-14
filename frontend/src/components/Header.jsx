@@ -35,6 +35,9 @@ function Header(props) {
         </div>
       </div>
       <div className="search-section">
+        <button className="search" onClick={handleSearch}>
+          <IconSVG>{SearchIcon}</IconSVG>
+        </button>
         <input
           type="text"
           className="search-bar"
@@ -42,16 +45,13 @@ function Header(props) {
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search"
         />
-        <button className="search" onClick={handleSearch}>
-          <IconSVG>{SearchIcon}</IconSVG>
-        </button>
       </div>
       <div className="right-section">
-        {/* <div className="search">
-          <button className="icon-button">
+        <div className="search-btn-container-compact">
+          <button className="search-compact">
             <IconSVG>{SearchIcon}</IconSVG>
           </button>
-        </div> */}
+        </div>
         {isAuthorized ? (
           <Link to={"/profile"}>
             <div className="icon profile-icon">

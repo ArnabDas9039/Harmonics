@@ -298,7 +298,7 @@ class PlaylistSerializer(serializers.Serializer):
         request = self.context.get("request")
         with transaction.atomic():
             songs = validated_data.pop("songs", None)
-            thumbnail = validated_data.pop("thumbnail_url", None)
+            thumbnail = validated_data.get("thumbnail_url")
 
             playlist = Playlist.objects.create(
                 title=validated_data["title"],
@@ -559,19 +559,86 @@ class UserFeedSerializer(serializers.ModelSerializer):
         return None
 
 
-# class RadioSerializer(serializers.ModelSerializer):
-#     results = SongSerializer(many=True)
+class RadioSerializer(serializers.Serializer):
+    def to_representation(self, instance):
+        rep = super().to_representation(instance)
+        request = self.context.get("request")
 
-#     class Meta:
-#         model = Radio
-#         fields = "__all__"
+        radio_queue = (
+            em.Radio_Queue.objects.filter(radio=instance.id)
+            .select_related("queue")
+            .order_by("order")
+        )
+        songs_with_order = []
+        song_serializer = SongSerializer(context={"request": request})
 
+        for queue_song in radio_queue:
+            song_data = song_serializer.to_representation(queue_song.queue)
+            song_data["order"] = queue_song.order
+            songs_with_order.append(song_data)
 
-# class CreateRadioSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Radio
-#         fields = "__all__"
-#         read_only_fields = ["user"]
+        rep["queue"] = songs_with_order
+        return rep
+
+    def get_thumbnail_url(self, obj):
+        if obj.thumbnail_url:
+            return f"{settings.MEDIA_FULL_URL}{obj.thumbnail_url}"
+        return None
+
+    public_id = serializers.CharField(read_only=True)
+    title = serializers.CharField(required=False)
+    thumbnail_url = serializers.ImageField(required=False)
+    seeds = serializers.JSONField(required=False, write_only=True)
+    queue = serializers.JSONField(required=False)
+    created_at = serializers.DateTimeField(required=False)
+
+    def validate_seeds(self, data):
+        if not isinstance(data, list):
+            raise serializers.ValidationError(
+                "Expected a list of content_object entries."
+            )
+        for entry in data:
+            if not isinstance(entry, dict):
+                raise serializers.ValidationError(
+                    "Each content_object must be a dictionary."
+                )
+            if "content_type" not in entry or "object_id" not in entry:
+                raise serializers.ValidationError(
+                    "Each content_object must include 'content_type' and 'object_id'."
+                )
+        return data
+
+    def create(self, validated_data):
+        with transaction.atomic():
+            seeds = validated_data.pop("seeds", None)
+
+            radio = em.Radio.objects.create(title="Radio")
+            if seeds:
+                for seed_data in seeds:
+                    content_type = seed_data.get("content_type")
+                    object_id = seed_data.get("object_id")
+                    if content_type == "song":
+                        try:
+                            seed_song = cm.Song.objects.get(public_id=object_id)
+                        except cm.Song.DoesNotExist:
+                            raise serializers.ValidationError(
+                                {
+                                    "object_id": f"Song with id {object_id} does not exist."
+                                }
+                            )
+                        em.Radio_Seed.objects.create(radio=radio, seed=seed_song)
+                    if content_type == "album":
+                        try:
+                            seed_album = cm.Album.objects.get(public_id=object_id)
+                        except cm.Album.DoesNotExist:
+                            raise serializers.ValidationError(
+                                {
+                                    "object_id": f"Album with id {object_id} does not exist."
+                                }
+                            )
+
+                        em.Radio_Seed.objects.create(radio=radio, seed=seed_song)
+        return radio
 
 
 # class RoomSerializer(serializers.ModelSerializer):

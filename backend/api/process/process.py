@@ -1,7 +1,5 @@
 import librosa
 import numpy as np
-import pandas as pd
-from ..models import SongFeature
 
 
 def extract_audio_features(audio_file):
@@ -10,8 +8,8 @@ def extract_audio_features(audio_file):
 
         duration = librosa.get_duration(y=y, sr=sr)
         tempo, _ = librosa.beat.beat_track(y=y, sr=sr)
-        energy = np.sum(y**2) / len(y)
         rms = librosa.feature.rms(y=y)
+        energy = np.mean(rms)
         loudness = np.mean(rms)
         chroma = librosa.feature.chroma_cens(y=y, sr=sr)
         key_index = np.argmax(np.mean(chroma, axis=1))
@@ -37,3 +35,6 @@ def extract_audio_features(audio_file):
     except Exception as e:
         print(f"Error extracting features: {e}")
         return None
+
+
+print(extract_audio_features("../../../../harmonics-media/api/tracks/Attention.mp3"))
